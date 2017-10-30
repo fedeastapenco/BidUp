@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "24377207659",
+    "firebase_url": "https://prueba-d667c.firebaseio.com",
+    "project_id": "prueba-d667c",
+    "storage_bucket": "prueba-d667c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24377207659:android:ace63744c80b82f7",
+        "android_client_info": {
+          "package_name": "proyectointegrador.bidup"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24377207659-r48g3pp4pg6u6u6obicas4vd8voe3fvi.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDq_VVdBraIa4N_eX2v2BH05KK8udCX1J8"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

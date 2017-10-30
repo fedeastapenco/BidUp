@@ -1,0 +1,18 @@
+{
+  "name": "bidup",
+  "version": "1.0.0",
+  "description": "Proyecto final para PDP",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase-admin": "^5.4.3",
+    "mongoose": "^4.12.4",
+    "morgan": "^1.9.0",
+    "nodemon": "^1.12.1"
+  }
+}
