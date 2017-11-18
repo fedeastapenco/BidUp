@@ -28,6 +28,7 @@ import com.cloudinary.android.MediaManager;
 import com.cloudinary.android.callback.ErrorInfo;
 import com.cloudinary.android.callback.UploadCallback;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -232,6 +233,8 @@ public class CreateAuctionActivity extends AppCompatActivity {
                 objectToSend.put("objectName", auction.getObjectName());
                 objectToSend.put("initialAmount", auction.getInitialAmount());
                 objectToSend.put("lastDate", auction.getLastDate());
+                JSONArray jsonArray = new JSONArray(urlPhoto);
+                objectToSend.put("photosUrl",jsonArray);
                 JSONObject response = HttpConnectionHelper.SendRequest(urlConnection, objectToSend, getSharedPreferences(PREFS_NAME,0));
                 if(response == null){
                     //no se pudo crear el usuario
