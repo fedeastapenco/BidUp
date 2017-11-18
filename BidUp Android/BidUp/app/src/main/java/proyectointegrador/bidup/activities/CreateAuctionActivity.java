@@ -25,6 +25,8 @@ import android.widget.Toast;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.android.MediaManager;
+import com.cloudinary.android.callback.ErrorInfo;
+import com.cloudinary.android.callback.UploadCallback;
 
 import org.json.JSONObject;
 
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +53,8 @@ public class CreateAuctionActivity extends AppCompatActivity {
     private EditText mInitialAmount;
     static final int TAKE_PHOTO = 100;
     String mCurrentPhotoPath;
-    String urlPhoto = null;
+    ArrayList<String> urlPhoto = new ArrayList<>();
+    boolean processing = false;
     //TODO agregar el input para date
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,31 +125,50 @@ public class CreateAuctionActivity extends AppCompatActivity {
         mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
-//    private Uri getOutputMediaFile() {
-//        Uri uri = null;
-//        try {
-//            File mediaStoreDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),"bidUpFotos");
-//            if(!mediaStoreDir.exists()){
-//                mediaStoreDir.mkdir();
-//            }
-//            String timeStamp = new SimpleDateFormat("yyyyMMdd_hhmmss").format(new Date());
-//            File mediaFile = new File(mediaStoreDir.getPath() + File.separator + "IMG_" + timeStamp + ".jpg");
-//            uri = Uri.fromFile(mediaFile);
-//        }catch(Exception ex){
-//            Log.e("Error al crear archivo", ex.getMessage());
-//        }
-//        return uri;
-//    }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+    protected void onActivityResult(int requestCode, final int resultCode, Intent data) {
         try {
+            final Activity activity = this;
             if(requestCode == TAKE_PHOTO){
                 if(resultCode == RESULT_OK){
                     Toast.makeText(this, "Imagen guardada en : \n" + mCurrentPhotoPath + ", la imagen se está subiendo a internet", Toast.LENGTH_LONG).show();
-                    //urlPhoto = MediaManager.get().url().generate(mCurrentPhotoPath);
-                     //MediaManager.get().getCloudinary().uploader().unsignedUpload(photo,"s1sqbyy4",new HashMap(0));
-                    //urlPhoto = MediaManager.get().url().generate(mCurrentPhotoPath);
+
+                    int last = mCurrentPhotoPath.lastIndexOf('/');
+                    String name = mCurrentPhotoPath.substring(last + 1 , mCurrentPhotoPath.length() -4);
+                    MediaManager.get().upload(mCurrentPhotoPath).unsigned("s1sqbyy4").callback(new UploadCallback() {
+                        @Override
+                        public void onStart(String requestId) {
+                            processing = true;
+                        }
+
+                        @Override
+                        public void onProgress(String requestId, long bytes, long totalBytes) {
+                        }
+
+                        @Override
+                        public void onSuccess(String requestId, Map resultData) {
+                            processing = false;
+                            if(resultData.containsKey("url")){
+                                Object value = resultData.get("url");
+                                urlPhoto.add(value.toString());
+                                Toast.makeText(activity, "Imagen subida correctamente", Toast.LENGTH_SHORT).show();
+
+                            }
+                        }
+
+                        @Override
+                        public void onError(String requestId, ErrorInfo error) {
+                            Log.e("Error:", error.getDescription());
+                            processing = false;
+                        }
+
+                        @Override
+                        public void onReschedule(String requestId, ErrorInfo error) {
+
+                        }
+                    }).dispatch();
+
                 }
             }
         }catch (Exception ex){
@@ -174,16 +197,22 @@ public class CreateAuctionActivity extends AppCompatActivity {
             focusView = mInitialAmount;
             cancel = true;
         }
-        if(cancel){
-            //hay error
-            focusView.requestFocus();
+        if(processing){
+            Toast.makeText(this, "Se está subiendo una imagen, por favor inténtelo en unos segundos", Toast.LENGTH_LONG).show();
+
         }else{
-            Auction auction = new Auction();
-            auction.setObjectName(objectName);
-            auction.setInitialAmount(Double.parseDouble(initialAmount));
-            mCreateAuctionTask = new CreateAuctionTask(this,auction);
-            mCreateAuctionTask.execute("/auction/create/");
+            if(cancel){
+                //hay error
+                focusView.requestFocus();
+            }else{
+                Auction auction = new Auction();
+                auction.setObjectName(objectName);
+                auction.setInitialAmount(Double.parseDouble(initialAmount));
+                mCreateAuctionTask = new CreateAuctionTask(this,auction);
+                mCreateAuctionTask.execute("/auction/create/");
+            }
         }
+
 
     }
     //TODO subo la imagen aca o cuando la saca?
