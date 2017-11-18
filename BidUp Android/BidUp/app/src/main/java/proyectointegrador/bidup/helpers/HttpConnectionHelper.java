@@ -43,7 +43,7 @@ public class HttpConnectionHelper {
         switch (urlConnection.getRequestMethod()) {
             case "POST":
                 if(sharedPreferences != null){
-                    objectToSend.put("currentAuthenticationToken", sharedPreferences.getString("authenticationToken","empty"));
+                    objectToSend.put("authenticationToken", sharedPreferences.getString("currentAuthenticationToken","empty"));
                 }
                 OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream());
                 writer.write(objectToSend.toString());

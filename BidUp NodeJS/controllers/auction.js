@@ -109,15 +109,29 @@ var removeBidUp = function (req, res) {
 
 var addFollower = function(req,res){
     //viene el ID en req.params, agrego el id a el array
-    var auction = Auction.findById(req.params.id);
-    auction.followersList.push(req.body.followerId);
-    var promise = auction.save();
-    promise.then(function(auctionDoc){
-        res.json(auctionDoc);
-    });
-    promise.catch(function(err){
-        res.status(400).end();
-    });
+    console.log(req.body.authenticationToken);
+    var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(404).end();
+        }else{
+            var auction = Auction.findById(req.body.auctionId);
+            auction.exec(function(err, auctionDoc){
+                auctionDoc.followersList.push(userDoc._id);
+                auctionDoc.save(function(err,doc){
+                    if(err){
+                        console.log("error" + err);
+                        res.json({"result" : false});
+                    }else{
+                        res.json({"result" : true});
+                    }
+                });
+            });
+        }
+    });   
 }
 
 var removeFollower = function (req, res) {

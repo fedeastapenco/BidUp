@@ -99,11 +99,11 @@ public class Auction {
         this.photosUrl = photosUrl;
     }
 
-    public List<BidUp> getBidUpsList() {
+    public ArrayList<BidUp> getBidUpsList() {
         return bidUpsList;
     }
 
-    public List<User> getFollowersList() {
+    public ArrayList<User> getFollowersList() {
         return followersList;
     }
 

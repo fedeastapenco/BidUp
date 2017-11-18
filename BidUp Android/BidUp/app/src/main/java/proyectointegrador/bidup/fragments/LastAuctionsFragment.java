@@ -162,7 +162,7 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                 }
                 return ret;
             } catch (Exception ex) {
-                Log.i("ERROR: " , ex.getMessage());
+                Log.e("ERROR: " , ex.getMessage());
                 return null;
             }
         }
