@@ -11,7 +11,7 @@ var cardSchema = Schema({
         require: true
     },
     cvv: String,
-    startDate: Date
+    expirationDate: Date
 });
 var model = mongoose.model('Card', cardSchema);
 module.exports = model;

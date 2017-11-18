@@ -10,7 +10,10 @@ var auctionSchema = Schema({
     },
     objectName: String,
     initialAmount: Number,
-    created: Date,
+    created: {
+        type:Date,
+        default: Date.now
+    },
     LastDate: Date,
     currentBidUp: {
         type: Schema.ObjectId,

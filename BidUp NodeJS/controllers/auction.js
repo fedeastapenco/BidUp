@@ -1,15 +1,28 @@
 //TODO guardar errores
 var Auction = require('../models/auction');
+var User = require('../models/user');
 //crear subasta
 var create = function (req, res) {
     var auction = new Auction(req.body);
-    var promise = auction.save();
-    promise.then(function (doc) {
-        res.json(doc);
+    //busco con el token al usuario y lo agrego.
+    var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            res.status(401).end();
+        }
+        
+        auction.user = userDoc._id;
+        var promise = auction.save();
+        promise.then(function (doc) {
+             res.json(doc);
+        });
+        promise.catch(function (err) {
+             res.status(400).end();
+        });
     });
-    promise.catch(function (err) {
-        res.status(400).end();
-    });
+    
 }
 //actualizar subasta
 var update = function (req, res) {
@@ -22,12 +35,20 @@ var update = function (req, res) {
 }
 //obtener por ID
 var getById = function (req, res) {
-    var auction = Auction.findById(req.params.id).populate('currentBidUp').populate('bidUpList').populate('followersList');
-    
-    auction.exec(function (err, response) {
-        if (err)
-            return console.log(err);
-        res.json(response);
+    var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(401).end();
+        }
+        var auction = Auction.findById(req.params.id).populate('user').populate('currentBidUp').populate('bidUpList').populate('followersList');
+        auction.exec(function (err, response) {
+            if (err)
+                return console.log(err);
+            res.json(response);
+        });
     });
 }
 
@@ -109,11 +130,64 @@ var removeFollower = function (req, res) {
 }
 
 var findByObjectName = function(req,res){
-    var auction = Auction.find({objectName: new RegExp('^' + req.params.objectName,"i")})
-    auction.exec(function(err,response){
+    var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
+    user.exec(function(err,userDoc){
         if(err)
-            return console.log(err);
-        res.json(response);
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(404).end();
+        }
+        var auction = Auction.find({objectName: new RegExp('^' + req.params.objectName,"i")}).populate('user');
+        auction.exec(function(err,response){
+            if(err)
+                return console.log(err);
+        res.json({"list" : response});
+        });
+    }
+    );
+}
+var getPublishedByUser = function(req,res){
+     //busco con el token al usuario y lo agrego.
+     var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
+     user.exec(function(err,userDoc){
+         if(err)
+             res.status(401).end();
+         if(userDoc == null){
+             console.log("user not found");
+             res.status(404).end();
+         }
+         var auction = Auction.find({"user" : userDoc._id});
+         auction.exec(function(err,auctionDoc){
+            if(err)
+                res.status(401).end();
+            if(auctionDoc == null){
+                res.status(404).end();
+                console.log("auction not found");
+            }
+            res.json({"publishedList" : auctionDoc});
+         });
     });
 }
-module.exports = { create, update, getById, remove, addPhoto, addBidUp, addFollower, removePhoto, removeFollower, removeBidUp, findByObjectName}
+var getLastAuctions = function(req,res){
+    var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(404).end();
+        }
+        var auction = Auction.find({}).sort({_id:-1}).limit(5).populate('user');
+        auction.exec(function(err,auctionDoc){
+           if(err)
+               res.status(401).end();
+           if(auctionDoc == null){
+               res.status(404).end();
+               console.log("auction not found");
+           }
+           res.json({"list" : auctionDoc});
+        });
+    });
+}
+module.exports = { create, update, getById, remove, addPhoto, addBidUp, addFollower, removePhoto, removeFollower, removeBidUp, findByObjectName, getPublishedByUser, getLastAuctions}

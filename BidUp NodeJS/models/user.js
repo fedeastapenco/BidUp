@@ -8,7 +8,8 @@ var userSchema = Schema({
     lastName: String,
     email: {
         type: String,
-        unique: true
+        unique: true,
+        required : true
     },
     password: String,
     ci: String,
@@ -20,7 +21,12 @@ var userSchema = Schema({
             type: Schema.ObjectId,
             ref: 'Card'
         }
-    ]
+    ],
+    authenticationToken:{
+        type:Schema.ObjectId,
+        ref:"UserToken"
+    }
+
 });
 var model = mongoose.model('User', userSchema);
 module.exports = model;
