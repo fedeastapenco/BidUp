@@ -17,7 +17,6 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         Log.d(TAG, "Refreshed token: " + refreshedToken);
 
-        // TODO: Implement this method to send any registration to your app's servers.
         sendRegistrationToServer(refreshedToken);
     }
 
@@ -30,6 +29,6 @@ public class FirebaseIDService extends FirebaseInstanceIdService {
      * @param token The new token.
      */
     private void sendRegistrationToServer(String token) {
-        // Add custom implementation, as needed.
+        //TODO levantar el id de usuario de donde sea y enviar junto con el nuevo token a el server
     }
 }

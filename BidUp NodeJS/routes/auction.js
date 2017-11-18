@@ -13,4 +13,6 @@ route.post('/removePhoto/:id', controller.removePhoto);
 route.post('/removeBidUp/:id', controller.removeBidUp);
 route.post('/removeFollower/:id', controller.removeFollower);
 route.get('/findByObjectName/:objectName', controller.findByObjectName);
+route.get('/getPublishedByUser/', controller.getPublishedByUser);
+route.get('/getLastAuctions/', controller.getLastAuctions);
 module.exports = route;

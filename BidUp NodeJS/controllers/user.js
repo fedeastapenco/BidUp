@@ -1,5 +1,6 @@
 var User = require('../models/user');
 var Card = require('../models/card');
+var UserToken = require('../models/userToken');
 var create = function (req, res) {
     var user = new User(req.body);
     var promise = user.save();
@@ -69,4 +70,31 @@ var updateRegistrationToken = function(req,res){
         res.status(204).end();
     });
 }
-module.exports = { create, update, getById, remove, createCard, updateRegistrationToken}
+var login = function(req,res){
+    var user = User.findOne({
+        'email' : req.body.email,
+        'password' : req.body.password
+    });
+    
+    user.exec(function(err,response){
+        if(err)
+            return console.log(err);
+        //en el nuevo login cambio el token del usuario
+        var userToken = new UserToken();
+        var promise = userToken.save();
+        promise.then(function(doc){
+            user.update({_id: response._id , $set : {authenticationToken: doc._id}}, function (err,userUpdated){
+                if(err)
+                    return console.log(err);
+                response.authenticationToken = doc._id;
+                res.json(response); 
+            });
+            
+        });
+        promise.catch(function(err){
+            res.status(400).end();
+        })
+        
+    });
+}
+module.exports = { create, update, getById, remove, createCard, updateRegistrationToken, login}
