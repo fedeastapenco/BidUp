@@ -8,15 +8,10 @@ var bidUpSchema = Schema({
         ref: 'User',
         require: true
     },
-    auction: {
-        type: Schema.ObjectId,
-        ref: 'Auction',
-        require: true
-    },
     card: {
         type: Schema.ObjectId,
         ref: 'Card',
-        require: true
+        // require: true
     },
     amount: Number,
     created: Date

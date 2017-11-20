@@ -32,7 +32,7 @@ import proyectointegrador.bidup.models.User;
 public class AuctionDetailActivity extends AppCompatActivity {
     private String auctionId;
     public static final String PREFS_NAME = "MyPrefsFile";
-
+    private Auction currentAuction = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,15 +54,25 @@ public class AuctionDetailActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
-                int bidUp = Integer.parseInt(txtBidUp.getText().toString());
-
+                double bidUpValue = Double.parseDouble(txtBidUp.getText().toString());
+                createBidUp(bidUpValue);
             }
         });
 
     }
 
+    private void createBidUp(double bidUpValue) {
+        if(bidUpValue < currentAuction.getInitialAmount() || (currentAuction.getCurrentBidUp() != null && bidUpValue < currentAuction.getCurrentBidUp().getAmount())){
+            TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
+            View focusView = txtBidUp;
+            txtBidUp.setError("Monto ingresado menor al actual: " + currentAuction.getCurrentBidUp().getAmount());
+            focusView.requestFocus();
+        }else{
+            new CreateBidUp(this).execute("/auction/addBidUp/" + auctionId);
+        }
+    }
     private void followAuction() {
-        new FollowAuction(this).execute("/auction/addfollower");
+        new FollowAuction(this).execute("/auction/addfollower/" + auctionId);
     }
 
     private class AuctionData extends AsyncTask<String,Void,Auction>{
@@ -139,6 +149,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
                         }
                     }
                 }
+                currentAuction = auction;
             }
         }
     }
@@ -152,9 +163,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
             try {
 
                 HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.POST, params);
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("auctionId",auctionId);
-                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,jsonObject,getSharedPreferences(PREFS_NAME,0));
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,getSharedPreferences(PREFS_NAME,0));
                 return response.getBoolean("result");
             }catch (Exception ex){
                 Log.i("ERROR: " , ex.getMessage());
@@ -175,16 +184,57 @@ public class AuctionDetailActivity extends AppCompatActivity {
             }
         }
     }
-    private class CreateBidUp extends AsyncTask<String,Void,Boolean>{
-
+    private class CreateBidUp extends AsyncTask<String,Void,Auction>{
+        private Activity activity;
+        public CreateBidUp(Activity activity){
+            this.activity = activity;
+        }
         @Override
-        protected Boolean doInBackground(String... strings) {
-
+        protected Auction doInBackground(String... params) {
+            try {
+                HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.POST, params);
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("",auctionId);
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,jsonObject,getSharedPreferences(PREFS_NAME,0));
+                JSONObject userJson = response.getJSONObject("user");
+                User user = new User(userJson.getString("_id"),userJson.getString("firstName"),userJson.getString("lastName"),userJson.getString("email"),userJson.getString("ci"),userJson.getString("address"),new Date());
+                JSONArray auxPhotos = response.getJSONArray("photosUrl");
+                String[] photosUrl = new String[auxPhotos.length()];
+                for (int i = 0; i < photosUrl.length; i++){
+                    photosUrl[i] = auxPhotos.get(i).toString();
+                }
+                JSONArray auxBidUp = response.getJSONArray("bidUpsList");
+                ArrayList<BidUp> bidUpsList = new ArrayList<>();
+                for (int i = 0; i < auxBidUp.length(); i++){
+                    JSONObject aux = auxBidUp.getJSONObject(i);
+                    JSONObject auxUser = aux.getJSONObject("user");
+                    User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
+                    bidUpsList.add(new BidUp(aux.getString("_id"),userBidUp, aux.getString("card"), aux.getDouble("amount"),new Date()));
+                }
+                JSONArray auxFollowers = response.getJSONArray("followersList");
+                ArrayList<User> followers = new ArrayList<>();
+                for(int i = 0; i < auxFollowers.length();i++){
+                    JSONObject aux = auxFollowers.getJSONObject(i);
+                    followers.add(new User(aux.getString("_id"),aux.getString("firstName"),aux.getString("lastName"),aux.getString("email"),aux.getString("ci"),aux.getString("address"),new Date()));
+                }
+                Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),new Date(), new Date(),photosUrl,bidUpsList,followers);
+                return ret;
+            }catch (Exception ex){
+                Log.i("ERROR: " , ex.getMessage());
+                return null;
+            }
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
-
+        protected void onPostExecute(Auction auction) {
+            if(auction == null){
+                Toast.makeText(activity, "Ocurrió un error interno", Toast.LENGTH_SHORT).show();
+            }else{
+                //viene actualizada
+                currentAuction = auction;
+                activity.finish();
+                startActivity(activity.getIntent());
+            }
         }
     }
 }

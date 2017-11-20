@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
 import proyectointegrador.bidup.activities.AuctionDetailActivity;
 import proyectointegrador.bidup.activities.CreateAuctionActivity;
@@ -108,7 +109,7 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
                 startActivity(intent);
             }
         });
-        auctionAdapter = new ArrayAdapter<Auction>(getView().getContext(),android.R.layout.simple_list_item_1, new ArrayList<Auction>());
+        auctionAdapter = new AuctionListAdapter(getActivity(),new ArrayList<Auction>());
         ListView listView = (ListView)getActivity().findViewById(android.R.id.list);
 
         listView.setAdapter(auctionAdapter);

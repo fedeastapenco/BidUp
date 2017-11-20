@@ -31,6 +31,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.Objects;
 
+import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
 import proyectointegrador.bidup.activities.AuctionDetailActivity;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
@@ -71,9 +72,8 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        auctionAdapter = new ArrayAdapter<Auction>(getView().getContext(),android.R.layout.simple_list_item_1, new ArrayList<Auction>());
+        auctionAdapter = new AuctionListAdapter(getActivity(),new ArrayList<Auction>());
         ListView listView = (ListView)getActivity().findViewById(android.R.id.list);
-
         listView.setAdapter(auctionAdapter);
         listView.setOnItemClickListener(this);
         setHasOptionsMenu(true);
@@ -158,7 +158,14 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                     JSONObject aux = auctions.getJSONObject(i);
                     JSONObject auxUser = aux.getJSONObject("user");
                     User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp));
+                    JSONArray auxPhotos = aux.getJSONArray("photosUrl");
+                    String[] photosUrl = new String[auxPhotos.length()];
+                    if(auxPhotos != null){
+                        for(int j = 0; j < auxPhotos.length(); j++){
+                            photosUrl[j] = auxPhotos.getString(j);
+                        }
+                    }
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp,photosUrl));
                 }
                 return ret;
             } catch (Exception ex) {
@@ -214,8 +221,15 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                 for (int i = 0; i < length; i++){
                     JSONObject aux = auctions.getJSONObject(i);
                     JSONObject auxUser = aux.getJSONObject("user");
+                    JSONArray auxPhotos = aux.getJSONArray("photosUrl");
+                    String[] photosUrl = new String[auxPhotos.length()];
+                    if(auxPhotos != null){
+                        for(int j = 0; j < auxPhotos.length(); j++){
+                            photosUrl[j] = auxPhotos.getString(j);
+                        }
+                    }
                     User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp));
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp, photosUrl));
                 }
                 return ret;
             } catch (Exception ex) {

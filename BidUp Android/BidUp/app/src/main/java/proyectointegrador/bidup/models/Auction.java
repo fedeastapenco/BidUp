@@ -28,6 +28,13 @@ public class Auction {
         this.initialAmount = initialAmount;
         this.user = user;
     }
+    public Auction(String _id, String objectName, double initialAmount, User user, String[] photosUrl){
+        this._id = _id;
+        this.objectName = objectName;
+        this.initialAmount = initialAmount;
+        this.user = user;
+        this.photosUrl = photosUrl;
+    }
     public Auction(String _id, User user, String objectName, double initialAmount, Date created, Date lastDate, String[] photosUrl, ArrayList<BidUp> bidUpsList, ArrayList<User> followersList) {
         this._id = _id;
         this.user = user;
