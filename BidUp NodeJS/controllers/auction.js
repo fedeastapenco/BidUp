@@ -2,6 +2,7 @@
 var Auction = require('../models/auction');
 var User = require('../models/user');
 var BidUp = require('../models/bidUp');
+var notify = require('../notify/notifierManager');
 //crear subasta
 var create = function (req, res) {
     var auction = new Auction(req.body);
@@ -44,7 +45,7 @@ var getById = function (req, res) {
             console.log("user not found");
             res.status(401).end();
         }
-        var auction = Auction.findById(req.params.id).populate('user').populate('currentBidUp').populate('bidUpList').populate('followersList');
+        var auction = Auction.findById(req.params.id).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
         auction.exec(function (err, response) {
             if (err)
                 return console.log(err);
@@ -96,23 +97,35 @@ var addBidUp = function(req,res){
             console.log("user not found");
             res.status(404).end();
         }else{
-            var auction = Auction.findById(req.params.auctionId);
+            var auction = Auction.findById(req.params.auctionId).populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}});
             auction.exec(function(err, auctionDoc){
                 var bidUp = new BidUp(req.body);
+                bidUp.user = userDoc._id;
                 var promise = bidUp.save();
                 promise.then(function (bidUpDoc) {
-                    auctionDoc.bidUpsList.push(bidUpDoc._id);
                     auctionDoc.currentBidUp = bidUpDoc._id;
+                    auctionDoc.bidUpsList.push(bidUpDoc._id);
                     auctionDoc.save(function(err,doc){
                         if(err){
                             console.log("error" + err);
                             res.status(500).end();
                         }else{
-                            res.json(doc);
+                            var auctionRet = Auction.findById(req.params.auctionId).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
+                            auctionRet.exec(function(err,responseFinal){
+                                if(err){
+                                    console.log("error: " +  err);
+                                    res.status(500).end();
+                                }else{
+                                    console.log("OK");
+                                    notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + "ha realizado una nueva puja",responseFinal.followersList);
+                                    res.json(responseFinal);
+                                }
+                            })
                         }
                     });
                 });
                 promise.catch(function (err) {
+                    console.log("error: " + err);
                     res.status(400).end();
                 });
               
@@ -132,7 +145,7 @@ var removeBidUp = function (req, res) {
 
 var addFollower = function(req,res){
     //viene el ID en req.params, agrego el id a el array
-    var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
+    var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
     user.exec(function(err,userDoc){
         if(err)
             res.status(401).end();

@@ -27,6 +27,7 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
 import proyectointegrador.bidup.AuctionListAdapter;
@@ -164,6 +165,8 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.INVISIBLE);
+                
+                auctionAdapter.clear();
                 auctionAdapter.addAll(auctions);
             }
         }

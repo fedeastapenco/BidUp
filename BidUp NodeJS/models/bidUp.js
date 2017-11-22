@@ -17,5 +17,8 @@ var bidUpSchema = Schema({
     created: Date
 
 });
+bidUpSchema.virtual('user.full').get(function(){
+    return this.user._id + this.user.firstName; 
+});
 var model = mongoose.model('BidUp', bidUpSchema);
 module.exports = model;

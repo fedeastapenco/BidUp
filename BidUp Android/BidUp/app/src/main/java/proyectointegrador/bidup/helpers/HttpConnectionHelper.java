@@ -42,11 +42,13 @@ public class HttpConnectionHelper {
     public static JSONObject SendRequest(HttpURLConnection urlConnection, JSONObject objectToSend, SharedPreferences sharedPreferences) throws IOException, JSONException {
         switch (urlConnection.getRequestMethod()) {
             case "POST":
-                if(sharedPreferences != null){
+                if(sharedPreferences != null && objectToSend != null){
                     objectToSend.put("authenticationToken", sharedPreferences.getString("currentAuthenticationToken","empty"));
                 }
                 OutputStreamWriter writer = new OutputStreamWriter(urlConnection.getOutputStream());
-                writer.write(objectToSend.toString());
+                if(objectToSend != null){
+                    writer.write(objectToSend.toString());
+                }
                 writer.flush();
                 int statusCode = urlConnection.getResponseCode();
                 if (statusCode == 200) {

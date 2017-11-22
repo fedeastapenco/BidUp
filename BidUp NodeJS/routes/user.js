@@ -7,5 +7,5 @@ route.get('/get/:id', controller.getById);
 route.post('/remove/:id', controller.remove);
 route.post('/update/:id', controller.update);
 route.post('/createCard/', controller.createCard);
-route.post('/updateRegistrationToken/:id',controller.updateRegistrationToken);
+route.post('/updateRegistrationToken/',controller.updateRegistrationToken);
 module.exports = route;

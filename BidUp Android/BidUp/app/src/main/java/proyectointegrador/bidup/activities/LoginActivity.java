@@ -361,11 +361,32 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 editor.putString("currentAuthenticationToken",token);
                 editor.putString("userId",userId);
                 editor.commit();
+                if(settings.getString("firebaseToken", "empty") != "empty"){
+                    new SendFirebaseToken(settings.getString("firebaseToken", "empty")).execute("/user/updateRegistrationToken");
+                }
                 Intent followers = new Intent(LoginActivity.this, MainActivity.class);
                 startActivity(followers);
             }
         }
-
+        private class SendFirebaseToken extends AsyncTask<String, Void, Boolean>{
+            private  String token;
+            public SendFirebaseToken(String token){
+                this.token = token;
+            }
+            @Override
+            protected Boolean doInBackground(String... params) {
+                try {
+                HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.POST, params);
+                JSONObject object = new JSONObject();
+                object.put("fireBaseRegistrationToken", token);
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,object,getSharedPreferences(PREFS_NAME,0));
+                return  true;
+                }catch (Exception ex){
+                    Log.i("ERROR: " , ex.getMessage());
+                    return false;
+                }
+            }
+        }
         @Override
         protected void onCancelled() {
             mAuthTask = null;

@@ -114,9 +114,4 @@ public class Auction {
         return followersList;
     }
 
-    @Override
-    public String toString() {
-        return "Nombre: " + objectName + '\n' +
-                "Precio inicial: " + initialAmount + '\n';
-    }
 }

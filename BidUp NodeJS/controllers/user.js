@@ -60,14 +60,16 @@ var createCard = function (req, res){
 }
 
 var updateRegistrationToken = function(req,res){
-    var user = User.findById(req.params.id);
-    user.fireBaseRegistrationToken = req.params.fireBaseRegistrationToken;
-    var promise = user.save();
-    promise.then(function(userDoc){
-        res.status(200).end();
-    })
-    .catch(function(err){
-        res.status(204).end();
+    var user = User.findOneAndUpdate({'authenticationToken' : req.body.authenticationToken},{$set:{fireBaseRegistrationToken:req.body.fireBaseRegistrationToken}});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(404).end();
+        }else{
+                res.status(200).end();
+        }
     });
 }
 var login = function(req,res){

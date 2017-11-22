@@ -13,10 +13,9 @@ public class BidUp {
     private double amount;
     private Date created;
 
-    public BidUp(String _id, User user, String card, double amount, Date created) {
+    public BidUp(String _id, User user, double amount, Date created) {
         this._id = _id;
         this.user = user;
-        this.card = card;
         this.amount = amount;
         this.created = created;
     }
