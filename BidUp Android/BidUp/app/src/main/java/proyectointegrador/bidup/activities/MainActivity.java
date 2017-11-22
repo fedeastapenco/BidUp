@@ -1,9 +1,8 @@
 package proyectointegrador.bidup.activities;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -13,33 +12,15 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
-import android.widget.ListView;
-import android.widget.SearchView;
-import android.widget.TextView;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 
 import proyectointegrador.bidup.fragments.CardFragment;
 import proyectointegrador.bidup.fragments.FollowerFragment;
 import proyectointegrador.bidup.fragments.LastAuctionsFragment;
 import proyectointegrador.bidup.fragments.PublishedFragment;
 import proyectointegrador.bidup.R;
-import proyectointegrador.bidup.helpers.HttpConnectionHelper;
-import proyectointegrador.bidup.helpers.HttpRequestMethod;
 import proyectointegrador.bidup.models.Auction;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
@@ -47,6 +28,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         ,CardFragment.OnFragmentInteractionListener, LastAuctionsFragment.OnFragmentInteractionListener {
     EditText editTextSearch;
     private ArrayAdapter<Auction> auctionAdapter;
+    public static final String PREFS_NAME = "MyPrefsFile";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         try{
@@ -104,8 +87,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }else if(id == R.id.nav_lastAuctions){
             fragment = new LastAuctionsFragment();
             fragmentTransaction = true;
-        }
-            if(fragmentTransaction){
+        }else if(id == R.id.nav_user_logout){
+            SharedPreferences sp = getSharedPreferences(PREFS_NAME,0);
+            sp.edit().remove("currentAuthenticationToken").commit();
+            Intent intentLogin = new Intent(this, LoginActivity.class);
+            startActivity(intentLogin);
+        }if(fragmentTransaction){
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.content_main, fragment)
                         .commit();

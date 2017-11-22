@@ -68,6 +68,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp = getSharedPreferences(PREFS_NAME,0);
+        if(sp != null && sp.getString("currentAuthenticationToken","empty") != "empty"){
+            //el usuario ya esta log, redireccionar
+            Intent main = new Intent(LoginActivity.this, MainActivity.class);
+            startActivity(main);
+        }
         setContentView(R.layout.activity_login);
         // Set up the login form.
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
@@ -364,8 +370,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 if(settings.getString("firebaseToken", "empty") != "empty"){
                     new SendFirebaseToken(settings.getString("firebaseToken", "empty")).execute("/user/updateRegistrationToken");
                 }
-                Intent followers = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(followers);
+                Intent main = new Intent(LoginActivity.this, MainActivity.class);
+                startActivity(main);
             }
         }
         private class SendFirebaseToken extends AsyncTask<String, Void, Boolean>{
