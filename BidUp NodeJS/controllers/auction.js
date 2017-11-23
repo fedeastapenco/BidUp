@@ -6,6 +6,9 @@ var notify = require('../notify/notifierManager');
 //crear subasta
 var create = function (req, res) {
     var auction = new Auction(req.body);
+    console.log(req.body.lastDate);
+    auction.lastDate = new Date(req.body.lastDate).toJSON();
+    console.log(auction.lastDate);
     //busco con el token al usuario y lo agrego.
     var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
     user.exec(function(err,userDoc){
@@ -116,8 +119,7 @@ var addBidUp = function(req,res){
                                     console.log("error: " +  err);
                                     res.status(500).end();
                                 }else{
-                                    console.log("OK");
-                                    notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + "ha realizado una nueva puja",responseFinal.followersList);
+                                    notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + " ha realizado una nueva puja",'proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL',{_id : req.params.auctionId},responseFinal.followersList);
                                     res.json(responseFinal);
                                 }
                             })

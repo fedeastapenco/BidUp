@@ -14,7 +14,13 @@ var auctionSchema = Schema({
         type:Date,
         default: Date.now
     },
-    LastDate: Date,
+    lastDate:{
+        type: Date
+    },
+    finished:{
+     type: Boolean,
+     default : false   
+    },
     currentBidUp: {
         type: Schema.ObjectId,
         ref: 'BidUp'

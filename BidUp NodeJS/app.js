@@ -29,11 +29,13 @@ var bidUp = require('./routes/bidUp');
 var brand = require('./routes/brand');
 var card = require('./routes/card');
 var user = require('./routes/user');
+var schedule = require('./schedule/schedule');
 app.use('/auction', auction);
 app.use('/bidup', bidUp);
 app.use('/brand', brand);
 app.use('/card', card);
 app.use('/user', user);
+schedule.checkAuctions();
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
   var err = new Error('Not Found');

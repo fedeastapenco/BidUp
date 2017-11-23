@@ -61,7 +61,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
-        <activity android:name=".activities.AuctionDetailActivity"></activity>
+        <activity android:name=".activities.AuctionDetailActivity">
+            <intent-filter>
+                <action android:name="proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL"></action>
+                <category android:name="android.intent.category.DEFAULT"></category>
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>

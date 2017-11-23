@@ -34,6 +34,8 @@ import org.json.JSONObject;
 import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -52,6 +54,7 @@ public class CreateAuctionActivity extends AppCompatActivity {
     public static final String PREFS_NAME = "MyPrefsFile";
     private EditText mObjectName;
     private EditText mInitialAmount;
+    private EditText mLastDate;
     static final int TAKE_PHOTO = 100;
     String mCurrentPhotoPath;
     ArrayList<String> urlPhoto = new ArrayList<>();
@@ -64,11 +67,16 @@ public class CreateAuctionActivity extends AppCompatActivity {
             setContentView(R.layout.activity_create_auction);
             mObjectName = (EditText)findViewById(R.id.create_auction_objectName);
             mInitialAmount = (EditText)findViewById(R.id.create_auction_initial_amount);
+            mLastDate = (EditText)findViewById(R.id.create_auction_last_date);
             Button mCreateAuction = (Button) findViewById(R.id.btn_create_auction);
             mCreateAuction.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    attemptCreateAuction();
+                    try {
+                        attemptCreateAuction();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
@@ -177,7 +185,7 @@ public class CreateAuctionActivity extends AppCompatActivity {
         }
     }
 
-    private void attemptCreateAuction(){
+    private void attemptCreateAuction() throws ParseException {
         if (mCreateAuctionTask != null) {
             return;
         }
@@ -185,7 +193,7 @@ public class CreateAuctionActivity extends AppCompatActivity {
         mInitialAmount.setError(null);
         String objectName = mObjectName.getText().toString();
         String initialAmount = mInitialAmount.getText().toString();
-
+        String lastDate = mLastDate.getText().toString();
         boolean cancel = false;
         View focusView = null;
         if(TextUtils.isEmpty(objectName)){
@@ -209,6 +217,7 @@ public class CreateAuctionActivity extends AppCompatActivity {
                 Auction auction = new Auction();
                 auction.setObjectName(objectName);
                 auction.setInitialAmount(Double.parseDouble(initialAmount));
+                auction.setLastDate(new SimpleDateFormat("yyyy-MM-dd").parse(lastDate));
                 mCreateAuctionTask = new CreateAuctionTask(this,auction);
                 mCreateAuctionTask.execute("/auction/create/");
             }
@@ -232,7 +241,9 @@ public class CreateAuctionActivity extends AppCompatActivity {
                 JSONObject objectToSend = new JSONObject();
                 objectToSend.put("objectName", auction.getObjectName());
                 objectToSend.put("initialAmount", auction.getInitialAmount());
-                objectToSend.put("lastDate", auction.getLastDate());
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+                String dateToSend = df.format(auction.getLastDate());
+                objectToSend.put("lastDate", dateToSend);
                 JSONArray jsonArray = new JSONArray(urlPhoto);
                 objectToSend.put("photosUrl",jsonArray);
                 JSONObject response = HttpConnectionHelper.SendRequest(urlConnection, objectToSend, getSharedPreferences(PREFS_NAME,0));

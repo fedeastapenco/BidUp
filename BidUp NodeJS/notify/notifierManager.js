@@ -6,13 +6,15 @@ firebaseAdmin.initializeApp({
     databaseURL: "https://bidupproject.firebaseio.com/"
 });
 
-function messageNotification(title, body, arrayUsers) {
+function messageNotification(title, body,click_action, data, arrayUsers) {
     //recibo titulo, cuerpo y tokens a cual enviar la notificacion
     var payload = {
         notification: {
             title: title,
-            body: body
-        }
+            body: body,
+            click_action : click_action
+        },
+        data : data
     };
     var fireBaseTokens = [];
     arrayUsers.forEach(element => {
