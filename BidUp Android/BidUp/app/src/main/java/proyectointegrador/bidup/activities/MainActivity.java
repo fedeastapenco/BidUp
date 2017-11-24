@@ -21,6 +21,7 @@ import proyectointegrador.bidup.fragments.FollowerFragment;
 import proyectointegrador.bidup.fragments.LastAuctionsFragment;
 import proyectointegrador.bidup.fragments.PublishedFragment;
 import proyectointegrador.bidup.R;
+import proyectointegrador.bidup.helpers.UserLoggedIn;
 import proyectointegrador.bidup.models.Auction;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener
@@ -29,6 +30,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     EditText editTextSearch;
     private ArrayAdapter<Auction> auctionAdapter;
     public static final String PREFS_NAME = "MyPrefsFile";
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UserLoggedIn.IsUserLoggedIn(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

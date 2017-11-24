@@ -27,8 +27,6 @@ import java.net.HttpURLConnection;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
 
 import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
@@ -53,6 +51,8 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
     private OnFragmentInteractionListener mListener;
     private ArrayAdapter<Auction> auctionAdapter;
     public static final String PREFS_NAME = "MyPrefsFile";
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
     public PublishedFragment() {
         // Required empty public constructor
     }
@@ -147,7 +147,9 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
                 //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
                 for (int i = 0; i < length; i++){
                     JSONObject aux = auctions.getJSONObject(i);
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount")));
+                    Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
+                    Date created = simpleDateFormat.parse(aux.getString("created"));
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), aux.getBoolean("finished"),created,lastDate));
                 }
                 return ret;
             }catch (Exception ex){

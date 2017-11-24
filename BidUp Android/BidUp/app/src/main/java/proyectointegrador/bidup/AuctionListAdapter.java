@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.squareup.picasso.Picasso;
 
 import java.lang.reflect.Array;
+import java.text.DateFormat;
 import java.util.ArrayList;
 
 import proyectointegrador.bidup.models.Auction;
@@ -37,13 +38,16 @@ public class AuctionListAdapter extends ArrayAdapter<Auction> {
 
         TextView txtTitle = (TextView) rowView.findViewById(R.id.item);
         ImageView imageView = (ImageView) rowView.findViewById(R.id.icon);
-        TextView extratxt = (TextView) rowView.findViewById(R.id.textView1);
-
+        TextView extratxt = (TextView) rowView.findViewById(R.id.txtAmount);
+        TextView lastDate = (TextView) rowView.findViewById(R.id.lastDate);
         txtTitle.setText(auctions.get(position).getObjectName());
         if(auctions.get(position).getPhotosUrl() != null && auctions.get(position).getPhotosUrl().length > 0){
             Picasso.with(context).load(auctions.get(position).getPhotosUrl()[0]).into(imageView);
         }
-        extratxt.setText("Descripción: "+auctions.get(position).getInitialAmount());
+        extratxt.setText("Monto inicial: "+auctions.get(position).getInitialAmount());
+        DateFormat dateFormat = DateFormat.getDateInstance();
+        if(auctions.get(position).getLastDate() != null)
+        lastDate.setText("Último día: " + dateFormat.format(auctions.get(position).getLastDate()));
         return rowView;
 
     };

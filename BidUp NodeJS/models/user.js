@@ -11,7 +11,10 @@ var userSchema = Schema({
         unique: true,
         required : true
     },
-    password: String,
+    password: {
+        type : String,
+        select : false
+    },
     ci: String,
     address: String,
     created: Date,

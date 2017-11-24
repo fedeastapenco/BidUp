@@ -46,6 +46,7 @@ import proyectointegrador.bidup.Manifest;
 import proyectointegrador.bidup.R;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
 import proyectointegrador.bidup.helpers.HttpRequestMethod;
+import proyectointegrador.bidup.helpers.UserLoggedIn;
 import proyectointegrador.bidup.models.Auction;
 import proyectointegrador.bidup.models.User;
 
@@ -185,6 +186,13 @@ public class CreateAuctionActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UserLoggedIn.IsUserLoggedIn(this);
+    }
+
+
     private void attemptCreateAuction() throws ParseException {
         if (mCreateAuctionTask != null) {
             return;
@@ -257,7 +265,7 @@ public class CreateAuctionActivity extends AppCompatActivity {
                     //ret.setLastDate();
                     ret.setInitialAmount(response.getDouble("initialAmount"));
                     ret.setObjectName(response.getString("objectName"));
-
+                    ret.setFinished(response.getBoolean("finished"));
                     return ret;
                 }
             } catch (Exception e) {

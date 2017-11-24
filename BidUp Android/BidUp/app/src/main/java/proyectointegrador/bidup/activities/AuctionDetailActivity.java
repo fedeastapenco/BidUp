@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewStub;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -17,14 +16,16 @@ import android.widget.Toast;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 import proyectointegrador.bidup.R;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
 import proyectointegrador.bidup.helpers.HttpRequestMethod;
+import proyectointegrador.bidup.helpers.UserLoggedIn;
 import proyectointegrador.bidup.models.Auction;
 import proyectointegrador.bidup.models.BidUp;
 import proyectointegrador.bidup.models.User;
@@ -60,7 +61,11 @@ public class AuctionDetailActivity extends AppCompatActivity {
         });
 
     }
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UserLoggedIn.IsUserLoggedIn(this);
+    }
     private void createBidUp(double bidUpValue) {
         if(bidUpValue < currentAuction.getInitialAmount()){
             TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
@@ -71,7 +76,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
             if(bidUpValue < currentAuction.getCurrentBidUp().getAmount()){
                 TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
                 View focusView = txtBidUp;
-                txtBidUp.setError("Monto ingresado menor al actual: " + currentAuction.getInitialAmount());
+                txtBidUp.setError("Monto ingresado menor a la puja actual: " + currentAuction.getCurrentBidUp().getAmount());
                 focusView.requestFocus();
             }
         }else{
@@ -97,6 +102,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
               }
               HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.GET, params);
               JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,null);
+              SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         //TODO arreglar los new Date()
               JSONObject userJson = response.getJSONObject("user");
               User user = new User(userJson.getString("_id"),userJson.getString("firstName"),userJson.getString("lastName"),userJson.getString("email"),userJson.getString("ci"),userJson.getString("address"),new Date());
@@ -119,7 +125,16 @@ public class AuctionDetailActivity extends AppCompatActivity {
                   JSONObject aux = auxFollowers.getJSONObject(i);
                   followers.add(new User(aux.getString("_id"),aux.getString("firstName"),aux.getString("lastName"),aux.getString("email"),aux.getString("ci"),aux.getString("address"),new Date()));
               }
-              Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),new Date(), new Date(),photosUrl,bidUpsList,followers);
+              Date lastDate = simpleDateFormat.parse(response.getString("lastDate"));
+              Date created = simpleDateFormat.parse(response.getString("created"));
+              Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),created, lastDate,photosUrl,bidUpsList,followers, response.getBoolean("finished"));
+              if(response.has("currentBidUp")){
+              JSONObject currentBidUpJSON = response.getJSONObject("currentBidUp");
+              if(currentBidUpJSON != null){
+                  BidUp currentBidUp = new BidUp(currentBidUpJSON.getString("_id"),null,currentBidUpJSON.getDouble("amount"),new Date());
+                  ret.setCurrentBidUp(currentBidUp);
+              }
+              }
               return ret;
           }catch (Exception ex){
               Log.i("ERROR: " , ex.getMessage());
@@ -134,6 +149,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 tv.setText("No se pudo obtener los datos de la subasta");
                 tv.setVisibility(View.VISIBLE);
             }else {
+                    DateFormat dateFormat = DateFormat.getDateInstance();
                 tv.setVisibility(View.INVISIBLE);
                 TextView tvId = (TextView) findViewById(R.id.auction_id);
                 tvId.setText("Id: " + auction.get_id());
@@ -142,28 +158,37 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 TextView tvObjectName = (TextView) findViewById(R.id.auction_object_name);
                 tvObjectName.setText("Objecto: " + auction.getObjectName());
                 TextView tvCreated = (TextView) findViewById(R.id.auction_created);
-                tvCreated.setText("Fecha inicial: " + auction.getCreated());
+                tvCreated.setText("Fecha inicial: " + dateFormat.format(auction.getCreated()));
                 TextView tvLastDate = (TextView) findViewById(R.id.auction_last_date);
-                tvLastDate.setText("Fecha finalización: " + auction.getLastDate());
-                if(auction.getFollowersList() != null){
-                    SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
-                    String _userId = settings.getString("userId","empty");
-                    //oculto button seguir
-                    for (int i = 0; i < auction.getFollowersList().size(); i++){
-                        if(auction.getFollowersList().get(i).get_id().equals(_userId)){
-                            Button btn = (Button)findViewById(R.id.btn_follow_auction);
-                            btn.setVisibility(View.INVISIBLE);
+                tvLastDate.setText("Fecha finalización: " + dateFormat.format(auction.getLastDate()));
+                if(!auction.getFinished()){
+                    if(auction.getFollowersList() != null){
+                        SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
+                        String _userId = settings.getString("userId","empty");
+                        //oculto button seguir
+                        for (int i = 0; i < auction.getFollowersList().size(); i++){
+                            if(auction.getFollowersList().get(i).get_id().equals(_userId)){
+                                Button btn = (Button)findViewById(R.id.btn_follow_auction);
+                                btn.setVisibility(View.INVISIBLE);
+                            }
                         }
                     }
-                }
                     SharedPreferences sp = getSharedPreferences(PREFS_NAME,0);
                     String userId = sp.getString("userId","empty");
                     if(auction.getUser().get_id().equals(userId)){
+                        Button btn = (Button)findViewById(R.id.btn_follow_auction);
+                        btn.setVisibility(View.INVISIBLE);
+                        TextInputLayout til = (TextInputLayout) findViewById(R.id.text_input_bid_up);
+                        til.setVisibility(View.INVISIBLE);
+                    }
+                }else{
                     Button btn = (Button)findViewById(R.id.btn_follow_auction);
                     btn.setVisibility(View.INVISIBLE);
                     TextInputLayout til = (TextInputLayout) findViewById(R.id.text_input_bid_up);
                     til.setVisibility(View.INVISIBLE);
+
                 }
+
                 currentAuction = auction;
             }
         }
@@ -238,7 +263,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
                     JSONObject aux = auxFollowers.getJSONObject(i);
                     followers.add(new User(aux.getString("_id"),aux.getString("firstName"),aux.getString("lastName"),aux.getString("email"),aux.getString("ci"),aux.getString("address"),new Date()));
                 }
-                Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),new Date(), new Date(),photosUrl,bidUpsList,followers);
+                Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),new Date(), new Date(),photosUrl,bidUpsList,followers, response.getBoolean("finished"));
                 return ret;
             }catch (Exception ex){
                 Log.i("ERROR: " , ex.getMessage());

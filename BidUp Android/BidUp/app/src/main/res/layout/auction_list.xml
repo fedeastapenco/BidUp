@@ -25,9 +25,15 @@
             android:padding="2dp"
             android:textColor="#33CC33" />
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/txtAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="TextView"
+            android:layout_marginLeft="10dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/lastDate"
             android:text="TextView"
             android:layout_marginLeft="10dp"/>
     </LinearLayout>

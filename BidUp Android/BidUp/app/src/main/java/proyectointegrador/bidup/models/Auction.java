@@ -2,7 +2,6 @@ package proyectointegrador.bidup.models;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 
 public class Auction {
@@ -16,26 +15,34 @@ public class Auction {
     private String[] photosUrl;
     private ArrayList<BidUp> bidUpsList;
     private ArrayList<User> followersList;
+    private boolean finished;
     public Auction(){}
-    public Auction(String _id, String objectName, double initialAmount) {
+    public Auction(String _id, String objectName, double initialAmount, boolean finished, Date created, Date lastDate) {
         this._id = _id;
         this.objectName = objectName;
         this.initialAmount = initialAmount;
+        this.finished = finished;
+        this.created = created;
+        this.lastDate = lastDate;
     }
-    public Auction(String _id, String objectName,double initialAmount, User user) {
+    public Auction(String _id, String objectName, double initialAmount, User user, boolean finished) {
         this._id = _id;
         this.objectName = objectName;
         this.initialAmount = initialAmount;
         this.user = user;
+        this.finished = finished;
     }
-    public Auction(String _id, String objectName, double initialAmount, User user, String[] photosUrl){
+    public Auction(String _id, String objectName, double initialAmount, User user, String[] photosUrl, boolean finished, Date created, Date lastDate){
         this._id = _id;
         this.objectName = objectName;
         this.initialAmount = initialAmount;
         this.user = user;
         this.photosUrl = photosUrl;
+        this.finished = finished;
+        this.lastDate = lastDate;
+        this.created = created;
     }
-    public Auction(String _id, User user, String objectName, double initialAmount, Date created, Date lastDate, String[] photosUrl, ArrayList<BidUp> bidUpsList, ArrayList<User> followersList) {
+    public Auction(String _id, User user, String objectName, double initialAmount, Date created, Date lastDate, String[] photosUrl, ArrayList<BidUp> bidUpsList, ArrayList<User> followersList, boolean finished) {
         this._id = _id;
         this.user = user;
         this.objectName = objectName;
@@ -45,6 +52,7 @@ public class Auction {
         this.photosUrl = photosUrl;
         this.bidUpsList = bidUpsList;
         this.followersList = followersList;
+        this.finished = finished;
     }
     public String get_id() {
         return _id;
@@ -113,5 +121,9 @@ public class Auction {
     public ArrayList<User> getFollowersList() {
         return followersList;
     }
+    public boolean getFinished(){return finished;}
 
+    public void setFinished(boolean finished) {
+        this.finished = finished;
+    }
 }

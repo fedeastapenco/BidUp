@@ -26,10 +26,10 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
-import java.util.Objects;
 
 import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
@@ -50,6 +50,7 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
     private OnFragmentInteractionListener mListener;
     public static final String PREFS_NAME = "MyPrefsFile";
     private ArrayAdapter<Auction> auctionAdapter;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public LastAuctionsFragment() {
         // Required empty public constructor
@@ -150,6 +151,7 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
             try {
                 urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.GET, params);
                 JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,null);
+
                 ArrayList<Auction> ret = new ArrayList<>();
                 JSONArray auctions = response.getJSONArray("list");
                 int length = auctions.length();
@@ -165,7 +167,10 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                             photosUrl[j] = auxPhotos.getString(j);
                         }
                     }
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp,photosUrl));
+                    Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
+                    Date created = simpleDateFormat.parse(aux.getString("created"));
+
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp,photosUrl, aux.getBoolean("finished"),created,lastDate));
                 }
                 return ret;
             } catch (Exception ex) {
@@ -229,7 +234,10 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                         }
                     }
                     User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp, photosUrl));
+                    Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
+                    Date created = simpleDateFormat.parse(aux.getString("created"));
+
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp, photosUrl, aux.getBoolean("finished"),created,lastDate));
                 }
                 return ret;
             } catch (Exception ex) {

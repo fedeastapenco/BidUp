@@ -100,36 +100,41 @@ var addBidUp = function(req,res){
             console.log("user not found");
             res.status(404).end();
         }else{
-            var auction = Auction.findById(req.params.auctionId).populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}});
+            var auction = Auction.findById(req.params.auctionId).populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}});
             auction.exec(function(err, auctionDoc){
-                var bidUp = new BidUp(req.body);
-                bidUp.user = userDoc._id;
-                var promise = bidUp.save();
-                promise.then(function (bidUpDoc) {
-                    auctionDoc.currentBidUp = bidUpDoc._id;
-                    auctionDoc.bidUpsList.push(bidUpDoc._id);
-                    auctionDoc.save(function(err,doc){
-                        if(err){
-                            console.log("error" + err);
-                            res.status(500).end();
-                        }else{
-                            var auctionRet = Auction.findById(req.params.auctionId).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
-                            auctionRet.exec(function(err,responseFinal){
-                                if(err){
-                                    console.log("error: " +  err);
-                                    res.status(500).end();
-                                }else{
-                                    notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + " ha realizado una nueva puja",'proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL',{_id : req.params.auctionId},responseFinal.followersList);
-                                    res.json(responseFinal);
-                                }
-                            })
-                        }
+                if(auctionDoc.currentBidUp != undefined && auctionDoc.currentBidUp.amount > req.body.amount){
+                    res.status(404).end();
+                }else{
+                    var bidUp = new BidUp(req.body);
+                    bidUp.user = userDoc._id;
+                    var promise = bidUp.save();
+                    promise.then(function (bidUpDoc) {
+                        auctionDoc.currentBidUp = bidUpDoc._id;
+                        auctionDoc.bidUpsList.push(bidUpDoc._id);
+                        auctionDoc.save(function(err,doc){
+                            if(err){
+                                console.log("error" + err);
+                                res.status(500).end();
+                            }else{
+                                var auctionRet = Auction.findById(req.params.auctionId).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
+                                auctionRet.exec(function(err,responseFinal){
+                                    if(err){
+                                        console.log("error: " +  err);
+                                        res.status(500).end();
+                                    }else{
+                                        notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + " ha realizado una nueva puja",'proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL',{_id : req.params.auctionId},responseFinal.followersList);
+                                        res.json(responseFinal);
+                                    }
+                                })
+                            }
+                        });
                     });
-                });
-                promise.catch(function (err) {
-                    console.log("error: " + err);
-                    res.status(400).end();
-                });
+                    
+                    promise.catch(function (err) {
+                        console.log("error: " + err);
+                        res.status(400).end();
+                    });
+                }
               
             });
         }
