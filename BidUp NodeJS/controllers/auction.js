@@ -16,16 +16,17 @@ var create = function (req, res) {
             res.status(401).end();
         if(userDoc == null){
             res.status(401).end();
+        }else{
+            auction.user = userDoc._id;
+            var promise = auction.save();
+            promise.then(function (doc) {
+                 res.json(doc);
+            });
+            promise.catch(function (err) {
+                 res.status(400).end();
+            });
         }
-        
-        auction.user = userDoc._id;
-        var promise = auction.save();
-        promise.then(function (doc) {
-             res.json(doc);
-        });
-        promise.catch(function (err) {
-             res.status(400).end();
-        });
+
     });
     
 }
@@ -33,9 +34,12 @@ var create = function (req, res) {
 var update = function (req, res) {
     var auction = Auction.findByIdAndUpdate(req.params.id, { $set: req.body });
     auction.exec(function (err, response) {
-        if (err)
+        if (err){
             return console.log(err);
-        res.json(response);
+            res.status(500).end();
+        }else{
+            res.json(response);
+        }
     });
 }
 //obtener por ID
@@ -47,23 +51,27 @@ var getById = function (req, res) {
         if(userDoc == null){
             console.log("user not found");
             res.status(401).end();
+        }else{
+            var auction = Auction.findById(req.params.id).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
+            auction.exec(function (err, response) {
+                if (err)
+                    return console.log(err);
+                res.json(response);
+            });
         }
-        var auction = Auction.findById(req.params.id).populate('user').populate('currentBidUp').populate({path:'bidUpsList', model:'BidUp',populate:{path:'user',model:'User'}}).populate('followersList');
-        auction.exec(function (err, response) {
-            if (err)
-                return console.log(err);
-            res.json(response);
-        });
     });
 }
 
 var remove = function (req, res) {
     var auction = Auction.findByIdAndRemove(req.params.id);
     auction.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){
+            console.log(err);
+            res.status(500).end();
+        }else{
+            res.status(204).end();
+        }
         //response 204 que es ok pero no content
-        res.status(204).end();
     });
 }
 
@@ -84,9 +92,12 @@ var addPhoto = function(req, res){
 var removePhoto = function (req, res) {
     var auction = Auction.findByIdAndUpdate(req.params.id, {$pull:{'photosUrl':{ id:req.body.urlPhoto}}});
     auction.exec(function(err,response){
-        if(err)
-            return console.log(err);
+        if(err){
+           console.log(err);
+            res.status(500).end();
+        }else{
             res.json(response);
+        }
     });
 }
 
@@ -179,9 +190,12 @@ var addFollower = function(req,res){
 var removeFollower = function (req, res) {
     var auction = Auction.findByIdAndUpdate(req.params.id, {$pull:{'followersList':{ id:req.body.followerId}}});
     auction.exec(function(err,response){
-        if(err)
-            return console.log(err);
+        if(err){
+            console.log(err);
+            res.status(500).end();
+        }else{
             res.json(response);
+        }
     });
 }
 
@@ -193,13 +207,14 @@ var findByObjectName = function(req,res){
         if(userDoc == null){
             console.log("user not found");
             res.status(404).end();
+        }else{
+            var auction = Auction.find({objectName: new RegExp('^' + req.params.objectName,"i")}).populate('user');
+            auction.exec(function(err,response){
+                if(err)
+                    return console.log(err);
+            res.json({"list" : response});
+            });
         }
-        var auction = Auction.find({objectName: new RegExp('^' + req.params.objectName,"i")}).populate('user');
-        auction.exec(function(err,response){
-            if(err)
-                return console.log(err);
-        res.json({"list" : response});
-        });
     }
     );
 }
@@ -212,17 +227,18 @@ var getPublishedByUser = function(req,res){
          if(userDoc == null){
              console.log("user not found");
              res.status(404).end();
+         }else{
+            var auction = Auction.find({"user" : userDoc._id}).populate('user');
+            auction.exec(function(err,auctionDoc){
+               if(err)
+                   res.status(401).end();
+               if(auctionDoc == null){
+                   res.status(404).end();
+                   console.log("auction not found");
+               }
+               res.json({"publishedList" : auctionDoc});
+            });
          }
-         var auction = Auction.find({"user" : userDoc._id});
-         auction.exec(function(err,auctionDoc){
-            if(err)
-                res.status(401).end();
-            if(auctionDoc == null){
-                res.status(404).end();
-                console.log("auction not found");
-            }
-            res.json({"publishedList" : auctionDoc});
-         });
     });
 }
 var getLastAuctions = function(req,res){
@@ -233,17 +249,18 @@ var getLastAuctions = function(req,res){
         if(userDoc == null){
             console.log("user not found");
             res.status(404).end();
+        }else{
+            var auction = Auction.find({}).sort({_id:-1}).limit(5).populate('user');
+            auction.exec(function(err,auctionDoc){
+               if(err)
+                   res.status(401).end();
+               if(auctionDoc == null){
+                   res.status(404).end();
+                   console.log("auction not found");
+               }
+               res.json({"list" : auctionDoc});
+            });
         }
-        var auction = Auction.find({}).sort({_id:-1}).limit(5).populate('user');
-        auction.exec(function(err,auctionDoc){
-           if(err)
-               res.status(401).end();
-           if(auctionDoc == null){
-               res.status(404).end();
-               console.log("auction not found");
-           }
-           res.json({"list" : auctionDoc});
-        });
     });
 }
 var getFollowedByUser = function(req,res){
@@ -255,17 +272,19 @@ var getFollowedByUser = function(req,res){
         if(userDoc == null){
             console.log("user not found");
             res.status(404).end();
+        }else{
+            var auction = Auction.find({"followersList" : userDoc._id}).populate('user');
+            auction.exec(function(err,auctionDoc){
+               if(err)
+                   res.status(401).end();
+               if(auctionDoc == null){
+                   res.status(404).end();
+                   console.log("auction not found");
+               }
+               res.json({"followedList" : auctionDoc});
+            });
         }
-        var auction = Auction.find({"followersList" : userDoc._id});
-        auction.exec(function(err,auctionDoc){
-           if(err)
-               res.status(401).end();
-           if(auctionDoc == null){
-               res.status(404).end();
-               console.log("auction not found");
-           }
-           res.json({"followedList" : auctionDoc});
-        });
+       
    });
 }
 module.exports = { create, update, getById, remove, addPhoto, addBidUp, addFollower, removePhoto, removeFollower, removeBidUp, findByObjectName, getPublishedByUser, getLastAuctions, getFollowedByUser}

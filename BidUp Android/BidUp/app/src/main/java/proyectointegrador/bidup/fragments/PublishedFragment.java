@@ -35,6 +35,8 @@ import proyectointegrador.bidup.activities.CreateAuctionActivity;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
 import proyectointegrador.bidup.helpers.HttpRequestMethod;
 import proyectointegrador.bidup.models.Auction;
+import proyectointegrador.bidup.models.User;
+
 import android.widget.AdapterView.OnItemClickListener;
 /**
  * A simple {@link Fragment} subclass.
@@ -147,9 +149,19 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
                 //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
                 for (int i = 0; i < length; i++){
                     JSONObject aux = auctions.getJSONObject(i);
+                    JSONObject auxUser = aux.getJSONObject("user");
+                    JSONArray auxPhotos = aux.getJSONArray("photosUrl");
+                    String[] photosUrl = new String[auxPhotos.length()];
+                    if(auxPhotos != null){
+                        for(int j = 0; j < auxPhotos.length(); j++){
+                            photosUrl[j] = auxPhotos.getString(j);
+                        }
+                    }
+                    User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
                     Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
                     Date created = simpleDateFormat.parse(aux.getString("created"));
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), aux.getBoolean("finished"),created,lastDate));
+
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp, photosUrl, aux.getBoolean("finished"),created,lastDate));
                 }
                 return ret;
             }catch (Exception ex){

@@ -14,18 +14,24 @@ var create = function (req, res) {
 var getById = function (req, res) {
     var card = Card.findById(req.params.id).populate('card');
     card.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         res.json(response);
+        }
     });
 }
 var remove = function (req, res) {
     var card = Card.findByIdAndRemove(req.params.id);
     card.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         //response 204 que es ok pero no content
         res.status(204).end();
+        }
     });
 }
 module.exports = { create, getById, remove }

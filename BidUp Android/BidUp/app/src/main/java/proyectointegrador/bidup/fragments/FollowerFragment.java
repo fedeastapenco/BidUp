@@ -29,10 +29,12 @@ import java.util.Date;
 
 import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
+import proyectointegrador.bidup.activities.AuctionDetailActivity;
 import proyectointegrador.bidup.activities.CreateAuctionActivity;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
 import proyectointegrador.bidup.helpers.HttpRequestMethod;
 import proyectointegrador.bidup.models.Auction;
+import proyectointegrador.bidup.models.User;
 
 
 /**
@@ -97,7 +99,10 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
 
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
+        Auction auction = (Auction)adapterView.getItemAtPosition(i);
+        Intent auctionDetail = new Intent(getActivity(), AuctionDetailActivity.class);
+        auctionDetail.putExtra("_id", auction.get_id());
+        startActivity(auctionDetail);
     }
     private class FollowedList extends AsyncTask<String, Void, ArrayList<Auction>> {
         private Activity activity;
@@ -120,9 +125,19 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
                 //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
                 for (int i = 0; i < length; i++){
                     JSONObject aux = auctions.getJSONObject(i);
+                    JSONObject auxUser = aux.getJSONObject("user");
+                    JSONArray auxPhotos = aux.getJSONArray("photosUrl");
+                    String[] photosUrl = new String[auxPhotos.length()];
+                    if(auxPhotos != null){
+                        for(int j = 0; j < auxPhotos.length(); j++){
+                            photosUrl[j] = auxPhotos.getString(j);
+                        }
+                    }
+                    User userBidUp = new User(auxUser.getString("_id"),auxUser.getString("firstName"),auxUser.getString("lastName"),auxUser.getString("email"),auxUser.getString("ci"),auxUser.getString("address"),new Date());
                     Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
                     Date created = simpleDateFormat.parse(aux.getString("created"));
-                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), aux.getBoolean("finished"),created,lastDate));
+
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), userBidUp, photosUrl, aux.getBoolean("finished"),created,lastDate));
                 }
                 return ret;
             }catch (Exception ex){
@@ -133,7 +148,7 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
 
         @Override
         protected void onPostExecute(ArrayList<Auction> auctions) {
-            TextView tv = (TextView) getActivity().findViewById(R.id.txt_error_published);
+            TextView tv = (TextView) getActivity().findViewById(R.id.txt_error_follower);
             if(auctions == null){
                 Log.d("Error:", "result en null.");
                 tv.setText("Ocurrió un error interno y la lista de subastas publicadas no se pudo cargar.");

@@ -15,27 +15,36 @@ var create = function (req, res) {
 var update = function (req, res) {
     var user = User.findByIdAndUpdate(req.params.id, { $set: req.body });
     user.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         res.json(response);
+        }
     });
 }
 
 var getById = function (req, res) {
     var user = User.findById(req.params.id).populate('cardList');
     user.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         res.json(response);
+        }
     });
 }
 var remove = function (req, res) {
     var user = User.findByIdAndRemove(req.params.id);
     user.exec(function (err, response) {
-        if (err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         //response 204 que es ok pero no content
         res.status(204).end();
+        }
     });
 }
 var createCard = function (req, res){
@@ -79,8 +88,10 @@ var login = function(req,res){
     });
     
     user.exec(function(err,response){
-        if(err)
-            return console.log(err);
+        if (err){ 
+            console.log(err)
+            res.status(500).end();
+        }else{
         //en el nuevo login cambio el token del usuario
         var userToken = new UserToken();
         var promise = userToken.save();
@@ -96,7 +107,7 @@ var login = function(req,res){
         promise.catch(function(err){
             res.status(400).end();
         })
-        
+    }
     });
 }
 module.exports = { create, update, getById, remove, createCard, updateRegistrationToken, login}
