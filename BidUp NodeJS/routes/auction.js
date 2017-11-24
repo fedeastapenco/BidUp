@@ -15,4 +15,5 @@ route.post('/removeFollower/:id', controller.removeFollower);
 route.get('/findByObjectName/:objectName', controller.findByObjectName);
 route.get('/getPublishedByUser/', controller.getPublishedByUser);
 route.get('/getLastAuctions/', controller.getLastAuctions);
+route.get('/getFollowedByUser/', controller.getFollowedByUser);
 module.exports = route;

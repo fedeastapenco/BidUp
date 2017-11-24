@@ -246,4 +246,26 @@ var getLastAuctions = function(req,res){
         });
     });
 }
-module.exports = { create, update, getById, remove, addPhoto, addBidUp, addFollower, removePhoto, removeFollower, removeBidUp, findByObjectName, getPublishedByUser, getLastAuctions}
+var getFollowedByUser = function(req,res){
+    //busco con el token al usuario y lo agrego.
+    var user = User.findOne({'authenticationToken' : req.query.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(404).end();
+        }
+        var auction = Auction.find({"followersList" : userDoc._id});
+        auction.exec(function(err,auctionDoc){
+           if(err)
+               res.status(401).end();
+           if(auctionDoc == null){
+               res.status(404).end();
+               console.log("auction not found");
+           }
+           res.json({"followedList" : auctionDoc});
+        });
+   });
+}
+module.exports = { create, update, getById, remove, addPhoto, addBidUp, addFollower, removePhoto, removeFollower, removeBidUp, findByObjectName, getPublishedByUser, getLastAuctions, getFollowedByUser}

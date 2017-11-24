@@ -115,7 +115,7 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
                 HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.GET, params);
                 JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,null);
                 ArrayList<Auction> ret = new ArrayList<>();
-                JSONArray auctions = response.getJSONArray("publishedList");
+                JSONArray auctions = response.getJSONArray("followedList");
                 int length = auctions.length();
                 //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
                 for (int i = 0; i < length; i++){
