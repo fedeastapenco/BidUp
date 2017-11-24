@@ -1,14 +1,38 @@
 package proyectointegrador.bidup.fragments;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.TextView;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.net.HttpURLConnection;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+
+import proyectointegrador.bidup.AuctionListAdapter;
 import proyectointegrador.bidup.R;
+import proyectointegrador.bidup.activities.CreateAuctionActivity;
+import proyectointegrador.bidup.helpers.HttpConnectionHelper;
+import proyectointegrador.bidup.helpers.HttpRequestMethod;
+import proyectointegrador.bidup.models.Auction;
 
 
 /**
@@ -17,9 +41,12 @@ import proyectointegrador.bidup.R;
  * {@link FollowerFragment.OnFragmentInteractionListener} interface
  * to handle interaction events.
  */
-public class FollowerFragment extends Fragment {
+public class FollowerFragment extends ListFragment implements AdapterView.OnItemClickListener {
 
     private OnFragmentInteractionListener mListener;
+    private ArrayAdapter<Auction> auctionAdapter;
+    public static final String PREFS_NAME = "MyPrefsFile";
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
     public FollowerFragment() {
         // Required empty public constructor
@@ -51,12 +78,74 @@ public class FollowerFragment extends Fragment {
         }
     }
 
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        auctionAdapter = new AuctionListAdapter(getActivity(),new ArrayList<Auction>());
+        ListView listView = (ListView)getActivity().findViewById(android.R.id.list);
+
+        listView.setAdapter(auctionAdapter);
+        listView.setOnItemClickListener(this);
+        new FollowedList(getActivity()).execute("/auction/getfollowedbyuser");
+
+    }
     @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+    }
+    private class FollowedList extends AsyncTask<String, Void, ArrayList<Auction>> {
+        private Activity activity;
+        public FollowedList(Activity activity){
+            this.activity = activity;
+        }
+
+        @Override
+        protected ArrayList<Auction> doInBackground(String... params) {
+            try {
+                SharedPreferences sp = getActivity().getSharedPreferences(PREFS_NAME,0);
+                if(sp != null){
+                    params[0] += "?authenticationToken=" + sp.getString("currentAuthenticationToken", "empty");
+                }
+                HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.GET, params);
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,null);
+                ArrayList<Auction> ret = new ArrayList<>();
+                JSONArray auctions = response.getJSONArray("publishedList");
+                int length = auctions.length();
+                //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+                for (int i = 0; i < length; i++){
+                    JSONObject aux = auctions.getJSONObject(i);
+                    Date lastDate = simpleDateFormat.parse(aux.getString("lastDate"));
+                    Date created = simpleDateFormat.parse(aux.getString("created"));
+                    ret.add(new Auction(aux.getString("_id"),aux.getString("objectName"),aux.getDouble("initialAmount"), aux.getBoolean("finished"),created,lastDate));
+                }
+                return ret;
+            }catch (Exception ex){
+                Log.i("ERROR: " , ex.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Auction> auctions) {
+            TextView tv = (TextView) getActivity().findViewById(R.id.txt_error_published);
+            if(auctions == null){
+                Log.d("Error:", "result en null.");
+                tv.setText("Ocurrió un error interno y la lista de subastas publicadas no se pudo cargar.");
+                tv.setVisibility(View.VISIBLE);
+            }else{
+                tv.setVisibility(View.INVISIBLE);
+
+                auctionAdapter.clear();
+                auctionAdapter.addAll(auctions);
+            }
+        }
+    }
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
