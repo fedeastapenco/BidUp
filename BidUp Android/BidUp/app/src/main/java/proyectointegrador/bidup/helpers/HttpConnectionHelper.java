@@ -60,7 +60,10 @@ public class HttpConnectionHelper {
                         stringBuilder.append(line);
                     }
                     return new JSONObject(stringBuilder.toString());
-                } else {
+                }else if(statusCode == 204){
+                    return new JSONObject();
+                }
+                else {
                     Log.d("Error:", "statusCode: " + statusCode);
                     return null;
                 }

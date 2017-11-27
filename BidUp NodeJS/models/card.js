@@ -4,14 +4,18 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
 var cardSchema = Schema({
-    number: Number,
-    brand: {
-        type: Schema.ObjectId,
-        ref: 'Brand',
-        require: true
+    number: {
+        type: Number,
+        select : false
     },
-    cvv: String,
-    expirationDate: Date
+    cvv: {
+     type : String,
+     select : false   
+    },
+    expirationDate: Date,
+    lastFour: {
+        type: Number
+    }
 });
 var model = mongoose.model('Card', cardSchema);
 module.exports = model;

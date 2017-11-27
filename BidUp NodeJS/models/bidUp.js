@@ -11,7 +11,7 @@ var bidUpSchema = Schema({
     card: {
         type: Schema.ObjectId,
         ref: 'Card',
-        // require: true
+        require: true
     },
     amount: Number,
     created: Date

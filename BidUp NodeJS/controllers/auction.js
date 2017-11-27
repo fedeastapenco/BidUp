@@ -6,9 +6,7 @@ var notify = require('../notify/notifierManager');
 //crear subasta
 var create = function (req, res) {
     var auction = new Auction(req.body);
-    console.log(req.body.lastDate);
     auction.lastDate = new Date(req.body.lastDate).toJSON();
-    console.log(auction.lastDate);
     //busco con el token al usuario y lo agrego.
     var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
     user.exec(function(err,userDoc){
@@ -63,15 +61,25 @@ var getById = function (req, res) {
 }
 
 var remove = function (req, res) {
-    var auction = Auction.findByIdAndRemove(req.params.id);
-    auction.exec(function (err, response) {
-        if (err){
-            console.log(err);
-            res.status(500).end();
+    var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
+    user.exec(function(err,userDoc){
+        if(err)
+            res.status(401).end();
+        if(userDoc == null){
+            console.log("user not found");
+            res.status(401).end();
         }else{
-            res.status(204).end();
+            var auction = Auction.findByIdAndRemove(req.params.id);
+            auction.exec(function (err, response) {
+                if (err){
+                    console.log(err);
+                    res.status(500).end();
+                }else{
+                    res.status(204).end();
+                }
+                //response 204 que es ok pero no content
+            });
         }
-        //response 204 que es ok pero no content
     });
 }
 
@@ -117,6 +125,7 @@ var addBidUp = function(req,res){
                     res.status(404).end();
                 }else{
                     var bidUp = new BidUp(req.body);
+                    console.log("cardID: " + req.body.card);
                     bidUp.user = userDoc._id;
                     var promise = bidUp.save();
                     promise.then(function (bidUpDoc) {

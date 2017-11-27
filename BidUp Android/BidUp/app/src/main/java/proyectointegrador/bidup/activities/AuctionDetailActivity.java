@@ -9,7 +9,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,18 +24,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import proyectointegrador.bidup.CardListBaseAdapter;
 import proyectointegrador.bidup.R;
 import proyectointegrador.bidup.helpers.HttpConnectionHelper;
 import proyectointegrador.bidup.helpers.HttpRequestMethod;
 import proyectointegrador.bidup.helpers.UserLoggedIn;
 import proyectointegrador.bidup.models.Auction;
 import proyectointegrador.bidup.models.BidUp;
+import proyectointegrador.bidup.models.Card;
 import proyectointegrador.bidup.models.User;
 
-public class AuctionDetailActivity extends AppCompatActivity {
+public class AuctionDetailActivity extends AppCompatActivity{
     private String auctionId;
     public static final String PREFS_NAME = "MyPrefsFile";
     private Auction currentAuction = null;
+    private BaseAdapter cardBaseAdapter;
+    private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,7 +65,15 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 createBidUp(bidUpValue);
             }
         });
+        Button mBtnRemoveAuction = (Button) findViewById(R.id.btn_remove_auction);
+        mBtnRemoveAuction.setOnClickListener(new View.OnClickListener(){
 
+            @Override
+            public void onClick(View view) {
+                removeAuction();
+            }
+        });
+        new CardsList(this).execute("/card/getByUser");
     }
     @Override
     protected void onResume() {
@@ -78,14 +92,37 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 View focusView = txtBidUp;
                 txtBidUp.setError("Monto ingresado menor a la puja actual: " + currentAuction.getCurrentBidUp().getAmount());
                 focusView.requestFocus();
+            }else{
+                try {
+                    Spinner spinner = (Spinner)findViewById(R.id.spinnerCards);
+                    Card card = (Card)spinner.getSelectedItem();
+
+                    new CreateBidUp(this, bidUpValue,card.get_id()).execute("/auction/addBidUp/" + auctionId);
+                }catch (Exception ex){
+                    Log.e("Error spinner: ", ex.getMessage());
+                }
             }
         }else{
-            new CreateBidUp(this, bidUpValue).execute("/auction/addBidUp/" + auctionId);
+            try {
+                Spinner spinner = (Spinner)findViewById(R.id.spinnerCards);
+                Card card = (Card)spinner.getSelectedItem();
+
+                new CreateBidUp(this, bidUpValue,card.get_id()).execute("/auction/addBidUp/" + auctionId);
+            }catch (Exception ex){
+                Log.e("Error spinner: ", ex.getMessage());
+            }
+
         }
     }
+
     private void followAuction() {
         new FollowAuction(this).execute("/auction/addfollower/" + auctionId);
     }
+    private void removeAuction(){
+        new RemoveAuction(this).execute("/auction/remove/" + auctionId);
+    }
+
+
 
     private class AuctionData extends AsyncTask<String,Void,Auction>{
         private Activity activity;
@@ -180,6 +217,8 @@ public class AuctionDetailActivity extends AppCompatActivity {
                         btn.setVisibility(View.INVISIBLE);
                         TextInputLayout til = (TextInputLayout) findViewById(R.id.text_input_bid_up);
                         til.setVisibility(View.INVISIBLE);
+                        Button btnRemove = (Button)findViewById(R.id.btn_remove_auction);
+                        btnRemove.setVisibility(View.VISIBLE);
                     }
                 }else{
                     Button btn = (Button)findViewById(R.id.btn_follow_auction);
@@ -230,9 +269,11 @@ public class AuctionDetailActivity extends AppCompatActivity {
     private class CreateBidUp extends AsyncTask<String,Void,Auction>{
         private Activity activity;
         private double amount;
-        public CreateBidUp(Activity activity, double amount){
+        private String cardId;
+        public CreateBidUp(Activity activity, double amount, String cardId){
             this.activity = activity;
             this.amount =amount;
+            this.cardId = cardId;
         }
         @Override
         protected Auction doInBackground(String... params) {
@@ -241,6 +282,7 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.POST, params);
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("amount",amount);
+                jsonObject.put("card", cardId);
                 JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,jsonObject,getSharedPreferences(PREFS_NAME,0));
                 JSONObject userJson = response.getJSONObject("user");
                 User user = new User(userJson.getString("_id"),userJson.getString("firstName"),userJson.getString("lastName"),userJson.getString("email"),userJson.getString("ci"),userJson.getString("address"),new Date());
@@ -280,6 +322,85 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 currentAuction = auction;
                 activity.finish();
                 startActivity(activity.getIntent());
+            }
+        }
+    }
+
+    private class RemoveAuction extends AsyncTask<String,Void,Boolean> {
+        private Activity activity;
+
+        public RemoveAuction(Activity activity) {
+            this.activity = activity;
+        }
+
+        @Override
+        protected Boolean doInBackground(String... params) {
+            try
+            {
+                HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.POST, params);
+                JSONObject jsonObject = new JSONObject();
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,jsonObject,getSharedPreferences(PREFS_NAME,0));
+                if(response != null)
+                    return true;
+                return false;
+            }catch (Exception ex){
+                Log.i("ERROR: " , ex.getMessage());
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(Boolean result) {
+            if(result){
+                Intent intent = new Intent(activity, MainActivity.class);
+                startActivity(intent);
+            }else{
+                Toast.makeText(activity, "Ocurrió un error interno", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private class CardsList extends AsyncTask<String,Void,ArrayList<Card>>{
+        private Activity activity;
+        public CardsList(Activity activity){
+            this.activity = activity;
+        }
+        @Override
+        protected ArrayList<Card> doInBackground(String... params) {
+            try {
+                SharedPreferences sp = activity.getSharedPreferences(PREFS_NAME,0);
+                if(sp != null){
+                    params[0] += "?authenticationToken=" + sp.getString("currentAuthenticationToken", "empty");
+                }
+                HttpURLConnection urlConnection = HttpConnectionHelper.CreateConnection(HttpRequestMethod.GET, params);
+                JSONObject response = HttpConnectionHelper.SendRequest(urlConnection,null,null);
+                ArrayList<Card> ret = new ArrayList<>();
+                JSONArray cardList = response.getJSONArray("cardList");
+                int length = cardList.length();
+                //TODO usar esto para created SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss aa");
+                for (int i = 0; i < length; i++){
+                    JSONObject aux = cardList.getJSONObject(i);
+                    Date expirationDate = simpleDateFormat.parse(aux.getString("expirationDate"));
+                    ret.add(new Card(aux.getString("_id"),aux.getInt("lastFour"),expirationDate));
+                }
+                return ret;
+            }catch (Exception ex){
+                Log.i("ERROR: " , ex.getMessage());
+                return null;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(ArrayList<Card> cardArrayList) {
+            TextView tv = (TextView)findViewById(R.id.txt_error_auction_detail);
+            if(cardArrayList == null){
+                Log.d("Error:", "result en null.");
+                tv.setText("Ocurrió un error interno y la lista de tarjetas no se pudo cargar.");
+                tv.setVisibility(View.VISIBLE);
+            }else{
+                tv.setVisibility(View.INVISIBLE);
+                cardBaseAdapter = new CardListBaseAdapter(activity,cardArrayList);
+                Spinner spinnerCards = (Spinner)findViewById(R.id.spinnerCards);
+                spinnerCards.setAdapter(cardBaseAdapter);
             }
         }
     }

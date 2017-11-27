@@ -5,7 +5,7 @@ var route = express.Router();
 route.post('/create/', controller.create);
 route.post('/update/:id', controller.update);
 route.get('/get/:id', controller.getById);
-route.post('/delete/:id', controller.remove);
+route.post('/remove/:id', controller.remove);
 route.post('/addPhoto/:id', controller.addPhoto);
 route.post('/addBidUp/:auctionId', controller.addBidUp);
 route.post('/addFollower/:auctionId', controller.addFollower);

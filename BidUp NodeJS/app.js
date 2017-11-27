@@ -26,13 +26,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 var auction = require('./routes/auction');
 var bidUp = require('./routes/bidUp');
-var brand = require('./routes/brand');
 var card = require('./routes/card');
 var user = require('./routes/user');
 var schedule = require('./schedule/schedule');
 app.use('/auction', auction);
 app.use('/bidup', bidUp);
-app.use('/brand', brand);
 app.use('/card', card);
 app.use('/user', user);
 schedule.checkAuctions();

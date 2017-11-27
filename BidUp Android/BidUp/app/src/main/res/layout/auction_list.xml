@@ -6,9 +6,10 @@
 
     <ImageView
         android:id="@+id/icon"
-        android:layout_width="60dp"
-        android:layout_height="60dp"
-        android:padding="5dp" />
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:padding="5dp"
+        android:paddingRight="10dp"/>
 
     <LinearLayout android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -19,22 +20,29 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Medium Text"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceListItem"
+            android:textSize="15dp"
             android:layout_marginLeft="10dp"
             android:layout_marginTop="5dp"
             android:padding="2dp"
-            android:textColor="#33CC33" />
+            android:textColor="@color/colorPrimary" />
         <TextView
             android:id="@+id/txtAmount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
             android:text="TextView"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginLeft="10dp"
+            android:textColor="@android:color/black"/>
         <TextView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:textAppearance="?android:attr/textAppearanceListItemSecondary"
+
             android:id="@+id/lastDate"
             android:text="TextView"
-            android:layout_marginLeft="10dp"/>
+            android:layout_marginLeft="10dp"
+            android:textColor="@android:color/black"/>
+
     </LinearLayout>
 </LinearLayout>

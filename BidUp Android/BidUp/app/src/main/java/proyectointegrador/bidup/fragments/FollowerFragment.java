@@ -151,7 +151,7 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
             TextView tv = (TextView) getActivity().findViewById(R.id.txt_error_follower);
             if(auctions == null){
                 Log.d("Error:", "result en null.");
-                tv.setText("Ocurrió un error interno y la lista de subastas publicadas no se pudo cargar.");
+                tv.setText("Ocurrió un error interno y la lista de subastas seguidas no se pudo cargar.");
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.INVISIBLE);

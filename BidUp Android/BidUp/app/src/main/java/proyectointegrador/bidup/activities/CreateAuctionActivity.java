@@ -214,6 +214,11 @@ public class CreateAuctionActivity extends AppCompatActivity {
             focusView = mInitialAmount;
             cancel = true;
         }
+        if(new SimpleDateFormat("yyyy-MM-dd").parse(lastDate).before(new Date())){
+            mLastDate.setError("La fecha debe ser mayor a la actual");
+            focusView = mLastDate;
+            cancel = true;
+        }
         if(processing){
             Toast.makeText(this, "Se está subiendo una imagen, por favor inténtelo en unos segundos", Toast.LENGTH_LONG).show();
 
