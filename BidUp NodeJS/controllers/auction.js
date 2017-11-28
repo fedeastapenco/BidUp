@@ -142,7 +142,7 @@ var addBidUp = function(req,res){
                                         console.log("error: " +  err);
                                         res.status(500).end();
                                     }else{
-                                        notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + userDoc.lastName  + " ha realizado una nueva puja",'proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL',{_id : req.params.auctionId},responseFinal.followersList);
+                                        notify.messageNotification("Nueva puja!","El usuario " + userDoc.firstName + " " + userDoc.lastName  + " ha realizado una nueva puja",'proyectointegrador.bidup_TARGET_NOTIFICATION_AUCTION_DETAIL',{_id : req.params.auctionId},responseFinal.followersList);
                                         res.json(responseFinal);
                                     }
                                 })

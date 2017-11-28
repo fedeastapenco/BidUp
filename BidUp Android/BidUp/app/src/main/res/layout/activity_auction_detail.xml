@@ -1,108 +1,155 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="proyectointegrador.bidup.activities.AuctionDetailActivity">
+    tools:context="proyectointegrador.bidup.activities.AuctionDetailActivity"
+    android:focusableInTouchMode="true">
+   <ScrollView
+       android:layout_width="match_parent"
+       android:layout_height="match_parent">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/btn_remove_auction"
+        android:text="Eliminar"
+        android:visibility="invisible"
+        android:backgroundTint="@color/colorPrimary"
+        android:textColor="@android:color/white"
+        android:layout_marginLeft="35dp"
+        android:layout_marginRight="35dp"
+        />
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:id="@+id/auction_image"
+        android:focusedByDefault="true"/>
     <TextView
         android:id="@+id/txt_error_auction_detail"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="15dp"
         android:visibility="invisible"/>
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/auction_image"/>
-    <TextView
-        android:id="@+id/auction_id"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        />
     <TextView
         android:id="@+id/auction_object_name"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
+        android:textColor="@android:color/black"
+        android:textSize="28dp"
+        android:layout_marginLeft="35dp"
+        android:layout_marginTop="5dp"
         />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="35dp"
+            android:id="@+id/auction_current_amount"
+            android:layout_marginTop="5dp"
+            android:textSize="26dp"
+            android:textColor="@color/colorPrimary"
+            android:layout_marginLeft="35dp"
+            />
     <TextView
         android:id="@+id/auction_initialAmount"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="35dp"
+        android:layout_marginTop="5dp"
+        android:textSize="26dp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginLeft="35dp"
        />
     <TextView
         android:id="@+id/auction_created"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="35dp"
        />
 
     <TextView
         android:id="@+id/auction_last_date"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="20dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="35dp"
         />
-    <android.support.design.widget.TextInputLayout
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
+        android:layout_height="25dp"
+        android:id="@+id/auction_finished"
+        android:layout_marginTop="5dp"
+        android:textSize="20dp"
+        android:textColor="@color/colorPrimary"
+        android:layout_marginLeft="35dp"
+        android:visibility="gone"/>
         <Button
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="35dp"
+            android:layout_marginRight="35dp"
             android:id="@+id/btn_follow_auction"
             android:text="Seguir"
             android:backgroundTint="@color/colorPrimary"
             android:textColor="@android:color/white"/>
-    </android.support.design.widget.TextInputLayout>
-
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:id="@+id/text_input_bid_up">
-
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Pujar"
+            android:textSize="30dp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="35dp"
+            android:id="@+id/auction_text_bid_up"/>
         <EditText
             android:id="@+id/edit_bid_up"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Monto de puja"
+            android:layout_height="55dp"
+            android:hint="Monto de la puja"
             android:inputType="number"
             android:maxLines="1"
+            android:layout_marginLeft="35dp"
+            android:layout_marginRight="35dp"
             android:singleLine="true"/>
         <TextView
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:paddingTop="15dp"
-            android:text="Seleccione la tarjeta"/>
-        <Spinner
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/spinnerCards"></Spinner>
+            android:layout_height="30dp"
+            android:layout_marginTop="15dp"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="Seleccione la tarjeta"
+            android:layout_marginLeft="35dp"
+            android:textSize="20dp"
+            android:id="@+id/txt_select_card"/>
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:paddingTop="15dp"
+        android:layout_marginRight="35dp"
+        android:layout_marginLeft="35dp"
+        android:id="@+id/spinnerCards" />
         <TextView
             android:id="@+id/txt_error_bid_up"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="invisible"/>
+            android:layout_height="45dp"
+            android:visibility="gone"/>
         <Button
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
             android:id="@+id/btn_create_bid_up"
             android:text="Pujar"
             android:backgroundTint="@color/colorPrimary"
             android:textColor="@android:color/white"
+            android:layout_marginLeft="35dp"
+            android:layout_marginRight="35dp"
             />
-    </android.support.design.widget.TextInputLayout>
+    </LinearLayout>
 
-    <android.support.design.widget.TextInputLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/auction_detail_remove">
-        <Button
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/btn_remove_auction"
-            android:text="Eliminar"
-            android:visibility="invisible"
-            android:backgroundTint="@color/colorPrimary"
-            android:textColor="@android:color/white"/>
-    </android.support.design.widget.TextInputLayout>
-
+   </ScrollView>
 </LinearLayout>

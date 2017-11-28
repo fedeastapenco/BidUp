@@ -3,17 +3,24 @@ package proyectointegrador.bidup.activities;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Paint;
+import android.graphics.Typeface;
 import android.os.AsyncTask;
 import android.support.design.widget.TextInputLayout;
-import android.support.v7.app.AppCompatActivity;
+//import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.squareup.picasso.Picasso;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -34,7 +41,7 @@ import proyectointegrador.bidup.models.BidUp;
 import proyectointegrador.bidup.models.Card;
 import proyectointegrador.bidup.models.User;
 
-public class AuctionDetailActivity extends AppCompatActivity{
+public class AuctionDetailActivity extends AppCompatActivity {
     private String auctionId;
     public static final String PREFS_NAME = "MyPrefsFile";
     private Auction currentAuction = null;
@@ -60,9 +67,7 @@ public class AuctionDetailActivity extends AppCompatActivity{
 
             @Override
             public void onClick(View view) {
-                TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
-                double bidUpValue = Double.parseDouble(txtBidUp.getText().toString());
-                createBidUp(bidUpValue);
+                createBidUp();
             }
         });
         Button mBtnRemoveAuction = (Button) findViewById(R.id.btn_remove_auction);
@@ -80,18 +85,29 @@ public class AuctionDetailActivity extends AppCompatActivity{
         super.onResume();
         UserLoggedIn.IsUserLoggedIn(this);
     }
-    private void createBidUp(double bidUpValue) {
-        if(bidUpValue < currentAuction.getInitialAmount()){
-            TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
-            View focusView = txtBidUp;
-            txtBidUp.setError("Monto ingresado menor al inicial: " + currentAuction.getInitialAmount());
-            focusView.requestFocus();
-        }else if(currentAuction.getCurrentBidUp() != null){
-            if(bidUpValue < currentAuction.getCurrentBidUp().getAmount()){
-                TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
+    private void createBidUp() {
+        TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
+        if(!txtBidUp.getText().toString().equals("")){
+            double bidUpValue = Double.parseDouble(txtBidUp.getText().toString());
+            if(bidUpValue < currentAuction.getInitialAmount()){
                 View focusView = txtBidUp;
-                txtBidUp.setError("Monto ingresado menor a la puja actual: " + currentAuction.getCurrentBidUp().getAmount());
+                txtBidUp.setError("Monto ingresado menor al inicial: " + currentAuction.getInitialAmount());
                 focusView.requestFocus();
+            }else if(currentAuction.getCurrentBidUp() != null){
+                if(bidUpValue < currentAuction.getCurrentBidUp().getAmount()){
+                    View focusView = txtBidUp;
+                    txtBidUp.setError("Monto ingresado menor a la puja actual: " + currentAuction.getCurrentBidUp().getAmount());
+                    focusView.requestFocus();
+                }else{
+                    try {
+                        Spinner spinner = (Spinner)findViewById(R.id.spinnerCards);
+                        Card card = (Card)spinner.getSelectedItem();
+
+                        new CreateBidUp(this, bidUpValue,card.get_id()).execute("/auction/addBidUp/" + auctionId);
+                    }catch (Exception ex){
+                        Log.e("Error spinner: ", ex.getMessage());
+                    }
+                }
             }else{
                 try {
                     Spinner spinner = (Spinner)findViewById(R.id.spinnerCards);
@@ -101,18 +117,14 @@ public class AuctionDetailActivity extends AppCompatActivity{
                 }catch (Exception ex){
                     Log.e("Error spinner: ", ex.getMessage());
                 }
+
             }
         }else{
-            try {
-                Spinner spinner = (Spinner)findViewById(R.id.spinnerCards);
-                Card card = (Card)spinner.getSelectedItem();
-
-                new CreateBidUp(this, bidUpValue,card.get_id()).execute("/auction/addBidUp/" + auctionId);
-            }catch (Exception ex){
-                Log.e("Error spinner: ", ex.getMessage());
-            }
-
+            View focusView = txtBidUp;
+            txtBidUp.setError("Monto requerido:");
+            focusView.requestFocus();
         }
+
     }
 
     private void followAuction() {
@@ -165,7 +177,7 @@ public class AuctionDetailActivity extends AppCompatActivity{
               Date lastDate = simpleDateFormat.parse(response.getString("lastDate"));
               Date created = simpleDateFormat.parse(response.getString("created"));
               Auction ret = new Auction(auctionId,user, response.getString("objectName"), response.getDouble("initialAmount"),created, lastDate,photosUrl,bidUpsList,followers, response.getBoolean("finished"));
-              if(response.has("currentBidUp")){
+              if(response.has("currentBidUp") && !response.isNull("currentBidUp")){
               JSONObject currentBidUpJSON = response.getJSONObject("currentBidUp");
               if(currentBidUpJSON != null){
                   BidUp currentBidUp = new BidUp(currentBidUpJSON.getString("_id"),null,currentBidUpJSON.getDouble("amount"),new Date());
@@ -187,17 +199,28 @@ public class AuctionDetailActivity extends AppCompatActivity{
                 tv.setVisibility(View.VISIBLE);
             }else {
                     DateFormat dateFormat = DateFormat.getDateInstance();
-                tv.setVisibility(View.INVISIBLE);
-                TextView tvId = (TextView) findViewById(R.id.auction_id);
-                tvId.setText("Id: " + auction.get_id());
+                tv.setVisibility(View.GONE);
                 TextView tvAmount = (TextView) findViewById(R.id.auction_initialAmount);
-                tvAmount.setText("Precio inicial: " + auction.getInitialAmount());
+                tvAmount.setText("$ " + auction.getInitialAmount());
+                if(auction.getCurrentBidUp() != null){
+                    tvAmount.setPaintFlags(Paint.STRIKE_THRU_TEXT_FLAG);
+                    TextView tvCurrentAmount = (TextView)findViewById(R.id.auction_current_amount);
+                    tvCurrentAmount.setText("Actual $" + auction.getCurrentBidUp().getAmount());
+                }else{
+                    TextView tvCurrentAmount = (TextView)findViewById(R.id.auction_current_amount);
+                    tvCurrentAmount.setVisibility(View.GONE);
+                }
                 TextView tvObjectName = (TextView) findViewById(R.id.auction_object_name);
-                tvObjectName.setText("Objecto: " + auction.getObjectName());
+                tvObjectName.setText(auction.getObjectName());
                 TextView tvCreated = (TextView) findViewById(R.id.auction_created);
-                tvCreated.setText("Fecha inicial: " + dateFormat.format(auction.getCreated()));
+                tvCreated.setText("Fecha publicación: " + dateFormat.format(auction.getCreated()));
                 TextView tvLastDate = (TextView) findViewById(R.id.auction_last_date);
                 tvLastDate.setText("Fecha finalización: " + dateFormat.format(auction.getLastDate()));
+                if(auction.getPhotosUrl() != null && auction.getPhotosUrl().length > 0){
+                    Picasso.with(activity).load(auction.getPhotosUrl()[0]).into((ImageView) findViewById(R.id.auction_image));
+                }else{
+                    findViewById(R.id.auction_image).setVisibility(View.GONE);
+                }
                 if(!auction.getFinished()){
                     if(auction.getFollowersList() != null){
                         SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
@@ -206,7 +229,7 @@ public class AuctionDetailActivity extends AppCompatActivity{
                         for (int i = 0; i < auction.getFollowersList().size(); i++){
                             if(auction.getFollowersList().get(i).get_id().equals(_userId)){
                                 Button btn = (Button)findViewById(R.id.btn_follow_auction);
-                                btn.setVisibility(View.INVISIBLE);
+                                btn.setVisibility(View.GONE);
                             }
                         }
                     }
@@ -214,18 +237,37 @@ public class AuctionDetailActivity extends AppCompatActivity{
                     String userId = sp.getString("userId","empty");
                     if(auction.getUser().get_id().equals(userId)){
                         Button btn = (Button)findViewById(R.id.btn_follow_auction);
-                        btn.setVisibility(View.INVISIBLE);
-                        TextInputLayout til = (TextInputLayout) findViewById(R.id.text_input_bid_up);
-                        til.setVisibility(View.INVISIBLE);
+                        btn.setVisibility(View.GONE);
+                        EditText til = (EditText) findViewById(R.id.edit_bid_up);
+                        til.setVisibility(View.GONE);
+                        TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
+                        txtBidUp.setVisibility(View.GONE);
+                        TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
+                        txtSelect.setVisibility(View.GONE);
+                        Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
+                        spinner.setVisibility(View.GONE);
+                        Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
+                        btnCreateBidUp.setVisibility(View.GONE);
                         Button btnRemove = (Button)findViewById(R.id.btn_remove_auction);
                         btnRemove.setVisibility(View.VISIBLE);
                     }
                 }else{
                     Button btn = (Button)findViewById(R.id.btn_follow_auction);
-                    btn.setVisibility(View.INVISIBLE);
-                    TextInputLayout til = (TextInputLayout) findViewById(R.id.text_input_bid_up);
-                    til.setVisibility(View.INVISIBLE);
+                    btn.setVisibility(View.GONE);
+                    EditText til = (EditText) findViewById(R.id.edit_bid_up);
+                    til.setVisibility(View.GONE);
+                    TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
+                    txtBidUp.setVisibility(View.GONE);
 
+                    TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
+                    txtSelect.setVisibility(View.GONE);
+                    Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
+                    spinner.setVisibility(View.GONE);
+                    Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
+                    btnCreateBidUp.setVisibility(View.GONE);
+                    TextView txtFinished = (TextView)findViewById(R.id.auction_finished);
+                    txtFinished.setText("Estado: Subasta Finalizada");
+                    txtFinished.setVisibility(View.VISIBLE);
                 }
 
                 currentAuction = auction;
@@ -260,9 +302,18 @@ public class AuctionDetailActivity extends AppCompatActivity{
             }else{
                 Toast.makeText(activity, "Resultado: ok, siguiendo subasta", Toast.LENGTH_SHORT).show();
                 Button btn = (Button)findViewById(R.id.btn_follow_auction);
-                btn.setVisibility(View.INVISIBLE);
-                TextInputLayout txl = (TextInputLayout) findViewById(R.id.text_input_bid_up);
+                btn.setVisibility(View.GONE);
+                EditText txl = (EditText) findViewById(R.id.edit_bid_up);
                 txl.setVisibility(View.VISIBLE);
+                TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
+                txtBidUp.setVisibility(View.VISIBLE);
+
+                TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
+                txtSelect.setVisibility(View.VISIBLE);
+                Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
+                spinner.setVisibility(View.VISIBLE);
+                Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
+                btnCreateBidUp.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -397,7 +448,7 @@ public class AuctionDetailActivity extends AppCompatActivity{
                 tv.setText("Ocurrió un error interno y la lista de tarjetas no se pudo cargar.");
                 tv.setVisibility(View.VISIBLE);
             }else{
-                tv.setVisibility(View.INVISIBLE);
+                tv.setVisibility(View.GONE);
                 cardBaseAdapter = new CardListBaseAdapter(activity,cardArrayList);
                 Spinner spinnerCards = (Spinner)findViewById(R.id.spinnerCards);
                 spinnerCards.setAdapter(cardBaseAdapter);

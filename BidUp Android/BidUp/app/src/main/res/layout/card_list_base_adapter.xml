@@ -14,6 +14,7 @@
             android:layout_height="50dp"
             android:padding="5dp"
             android:textAlignment="center"
+            android:textSize="18dp"
             android:layout_marginLeft="25dp"/>
         <!--<TextView-->
             <!--android:layout_width="match_parent"-->
