@@ -14,7 +14,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         />
-
+    <TextView android:id="@+id/emptyElement"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:textSize="35dp"
+        android:textColor="@color/colorPrimary"
+        android:text="No se encontraron subastas, cree una desde el botón en la parte inferior"
+        android:visibility="gone"/>
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab_create_auction"
         app:rippleColor="@color/colorPrimaryDark"

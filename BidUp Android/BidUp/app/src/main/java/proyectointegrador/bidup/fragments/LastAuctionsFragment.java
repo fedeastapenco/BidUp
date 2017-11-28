@@ -78,6 +78,12 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
         listView.setAdapter(auctionAdapter);
         listView.setOnItemClickListener(this);
         setHasOptionsMenu(true);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         getLastAuctions();
     }
 
@@ -262,6 +268,11 @@ public class LastAuctionsFragment extends ListFragment implements AdapterView.On
                         if(aux.getUser().get_id().equals(userId))
                             auctionIterator.remove();
                     }
+                }
+                if(auctions.size() == 0){
+                    ListView listView = (ListView)activity.findViewById(android.R.id.list);
+                    listView.setEmptyView(activity.findViewById(R.id.emptyElement));
+                    activity.findViewById(R.id.emptyElement).setVisibility(View.VISIBLE);
                 }
                 auctionAdapter.clear();
                 auctionAdapter.addAll(auctions);

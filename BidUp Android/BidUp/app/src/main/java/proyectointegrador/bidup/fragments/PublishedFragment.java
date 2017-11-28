@@ -117,9 +117,15 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
 
         listView.setAdapter(auctionAdapter);
         listView.setOnItemClickListener(this);
-        new PublishedList(getActivity()).execute("/auction/getpublishedbyuser");
 
     }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new PublishedList(getActivity()).execute("/auction/getpublishedbyuser");
+    }
+
     @Override
     public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
         Auction auction = (Auction)adapterView.getItemAtPosition(i);
@@ -179,7 +185,11 @@ public class PublishedFragment extends ListFragment implements OnItemClickListen
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.INVISIBLE);
-                
+                if(auctions.size() == 0){
+                    ListView listView = (ListView)activity.findViewById(android.R.id.list);
+                    listView.setEmptyView(activity.findViewById(R.id.emptyElement));
+                    activity.findViewById(R.id.emptyElement).setVisibility(View.VISIBLE);
+                }
                 auctionAdapter.clear();
                 auctionAdapter.addAll(auctions);
             }

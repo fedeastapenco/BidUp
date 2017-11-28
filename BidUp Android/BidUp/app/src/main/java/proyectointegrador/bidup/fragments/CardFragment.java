@@ -91,6 +91,12 @@ public class CardFragment extends Fragment implements AdapterView.OnItemClickLis
         ListView listView = (ListView)getActivity().findViewById(android.R.id.list);
         listView.setAdapter(cardAdapter);
         listView.setOnItemClickListener(this);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         new CardList(getActivity()).execute("/card/getbyuser");
     }
 
@@ -153,7 +159,11 @@ public class CardFragment extends Fragment implements AdapterView.OnItemClickLis
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.INVISIBLE);
-
+                if(cards.size() == 0){
+                    ListView listView = (ListView)activity.findViewById(android.R.id.list);
+                    listView.setEmptyView(activity.findViewById(R.id.emptyElement));
+                    activity.findViewById(R.id.emptyElement).setVisibility(View.VISIBLE);
+                }
                 cardAdapter.clear();
                 cardAdapter.addAll(cards);
             }

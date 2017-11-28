@@ -34,7 +34,7 @@ public class CardListAdapter extends ArrayAdapter<Card>{
         TextView textViewExpiration = (TextView)rowView.findViewById(R.id.card_list_expiration_date);
         textViewLastFour.setText("Tarjeta: **** **** **** " + cards.get(position).getLastFour());
         DateFormat dateFormat = DateFormat.getDateInstance();
-        textViewExpiration.setText(dateFormat.format(cards.get(position).getExpirationDate()));
+        textViewExpiration.setText("Fecha vencimiento: " + dateFormat.format(cards.get(position).getExpirationDate()));
         return rowView;
     }
 

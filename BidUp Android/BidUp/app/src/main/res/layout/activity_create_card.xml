@@ -57,7 +57,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:text="Aceptar"
-                android:textStyle="bold"
+                android:backgroundTint="@color/colorPrimary"
+                android:textColor="@android:color/white"
                 android:id="@+id/btn_create_card"/>
             <TextView
                 android:id="@+id/txt_error_create_card"

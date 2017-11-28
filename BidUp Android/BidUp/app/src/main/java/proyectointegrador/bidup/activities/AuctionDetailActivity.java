@@ -54,6 +54,12 @@ public class AuctionDetailActivity extends AppCompatActivity {
         String _id = current.getStringExtra("_id");
         auctionId = _id;
         setContentView(R.layout.activity_auction_detail);
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        UserLoggedIn.IsUserLoggedIn(this);
         new AuctionData(this).execute("/auction/get/" + auctionId);
         Button mFollowAuction = (Button) findViewById(R.id.btn_follow_auction);
         mFollowAuction.setOnClickListener(new View.OnClickListener() {
@@ -79,11 +85,6 @@ public class AuctionDetailActivity extends AppCompatActivity {
             }
         });
         new CardsList(this).execute("/card/getByUser");
-    }
-    @Override
-    protected void onResume() {
-        super.onResume();
-        UserLoggedIn.IsUserLoggedIn(this);
     }
     private void createBidUp() {
         TextView txtBidUp = (TextView) findViewById(R.id.edit_bid_up);
@@ -303,17 +304,18 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 Toast.makeText(activity, "Resultado: ok, siguiendo subasta", Toast.LENGTH_SHORT).show();
                 Button btn = (Button)findViewById(R.id.btn_follow_auction);
                 btn.setVisibility(View.GONE);
-                EditText txl = (EditText) findViewById(R.id.edit_bid_up);
-                txl.setVisibility(View.VISIBLE);
-                TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
-                txtBidUp.setVisibility(View.VISIBLE);
-
-                TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
-                txtSelect.setVisibility(View.VISIBLE);
-                Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
-                spinner.setVisibility(View.VISIBLE);
-                Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
-                btnCreateBidUp.setVisibility(View.VISIBLE);
+//
+//                EditText txl = (EditText) findViewById(R.id.edit_bid_up);
+//                txl.setVisibility(View.VISIBLE);
+//                TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
+//                txtBidUp.setVisibility(View.VISIBLE);
+//
+//                TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
+//                txtSelect.setVisibility(View.VISIBLE);
+//                Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
+//                spinner.setVisibility(View.VISIBLE);
+//                Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
+//                btnCreateBidUp.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -449,9 +451,28 @@ public class AuctionDetailActivity extends AppCompatActivity {
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.GONE);
+                SharedPreferences sp = getSharedPreferences(PREFS_NAME,0);
+                String userId = sp.getString("userId","empty");
+                if(cardArrayList.size() == 0 && !currentAuction.getUser().get_id().equals(userId)){
+                    EditText til = (EditText) findViewById(R.id.edit_bid_up);
+                    til.setVisibility(View.GONE);
+                    TextView txtBidUp = (TextView)findViewById(R.id.auction_text_bid_up);
+                    txtBidUp.setText("Registre una tarjeta");
+                    txtBidUp.setVisibility(View.VISIBLE);
+
+                    TextView txtSelect = (TextView)findViewById(R.id.txt_select_card);
+                    txtSelect.setVisibility(View.GONE);
+                    Spinner spinner = (Spinner) findViewById(R.id.spinnerCards);
+                    spinner.setVisibility(View.GONE);
+                    Button btnCreateBidUp = (Button) findViewById(R.id.btn_create_bid_up);
+                    btnCreateBidUp.setVisibility(View.GONE);
+
+                }else{
                 cardBaseAdapter = new CardListBaseAdapter(activity,cardArrayList);
                 Spinner spinnerCards = (Spinner)findViewById(R.id.spinnerCards);
                 spinnerCards.setAdapter(cardBaseAdapter);
+
+                }
             }
         }
     }

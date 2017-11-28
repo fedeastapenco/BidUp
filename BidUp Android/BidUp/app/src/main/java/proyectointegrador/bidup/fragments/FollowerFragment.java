@@ -88,9 +88,16 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
 
         listView.setAdapter(auctionAdapter);
         listView.setOnItemClickListener(this);
+
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
         new FollowedList(getActivity()).execute("/auction/getfollowedbyuser");
 
     }
+
     @Override
     public void onDetach() {
         super.onDetach();
@@ -155,7 +162,11 @@ public class FollowerFragment extends ListFragment implements AdapterView.OnItem
                 tv.setVisibility(View.VISIBLE);
             }else{
                 tv.setVisibility(View.INVISIBLE);
-
+                if(auctions.size() == 0){
+                    ListView listView = (ListView)activity.findViewById(android.R.id.list);
+                    listView.setEmptyView(activity.findViewById(R.id.emptyElement));
+                    activity.findViewById(R.id.emptyElement).setVisibility(View.VISIBLE);
+                }
                 auctionAdapter.clear();
                 auctionAdapter.addAll(auctions);
             }
