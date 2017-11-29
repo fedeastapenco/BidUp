@@ -110,6 +110,7 @@ var removePhoto = function (req, res) {
 }
 
 var addBidUp = function(req,res){
+    
     //viene el ID en req.params, agrego el id a el array
     var user = User.findOne({'authenticationToken' : req.body.authenticationToken});
     user.exec(function(err,userDoc){

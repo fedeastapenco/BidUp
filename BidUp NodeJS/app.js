@@ -29,6 +29,8 @@ var bidUp = require('./routes/bidUp');
 var card = require('./routes/card');
 var user = require('./routes/user');
 var schedule = require('./schedule/schedule');
+var scheduleConfig = require('./routes/scheduleConfig');
+app.use('/scheduleconfig', scheduleConfig);
 app.use('/auction', auction);
 app.use('/bidup', bidUp);
 app.use('/card', card);
